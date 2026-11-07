@@ -1,6 +1,6 @@
 # Arquitectura de SGIP
 
-Actualizado: **6 de noviembre de 2026**. Documento del estado implementado del proyecto local.
+Actualizado: **7 de noviembre de 2026**. Documento del estado implementado del proyecto local.
 
 ## 1. Enfoque arquitectónico
 
@@ -17,7 +17,7 @@ flowchart LR
     F[Flyway al iniciar] --> DB
 ```
 
-En desarrollo local, Angular utiliza el puerto 4200, Spring Boot el 8080 y PostgreSQL el 5433. Son procesos separados; el monolito se refiere al servidor de negocio.
+En desarrollo, Angular utiliza el puerto 4200 y Spring Boot el 8080; el puerto de PostgreSQL se configura mediante BD_PUERTO. Son procesos separados; el monolito se refiere al servidor de negocio.
 
 ## 2. Tecnologías y responsabilidades
 
@@ -96,7 +96,7 @@ La API vuelve a consultar el estado activo y los roles del usuario en cada solic
 
 Las contraseñas se almacenan con BCrypt. El restablecimiento administrativo no exige la contraseña anterior y registra la acción sin incluir el secreto en auditoría. La modificación propia exige la contraseña actual. No existe todavía cambio obligatorio al siguiente ingreso ni revocación de tokens por cambio de contraseña; las sesiones emitidas conservan su vencimiento.
 
-La configuración local PostgreSQL utiliza autenticación `trust`. La configuración de despliegue institucional, TLS, respaldos, gestión de secretos y controles operativos requiere una etapa adicional de preparación.
+Cada instalación debe configurar su propia conexión PostgreSQL y autenticación mediante contraseña. La configuración de despliegue institucional, TLS, respaldos, gestión de secretos y controles operativos requiere una etapa adicional de preparación.
 
 ## 6. Reglas operativas
 
