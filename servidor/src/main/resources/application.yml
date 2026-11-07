@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${BD_HOST:localhost}:${BD_PUERTO:5432}/${BD_NOMBRE:sgip}
+    username: ${BD_USUARIO:sgip}
+    password: ${BD_CONTRASENA:}
+  data:
+    web:
+      pageable:
+        page-parameter: pagina
+        size-parameter: tamano
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+server:
+  port: ${PUERTO:8080}
+sgip:
+  secreto-jwt: ${JWT_SECRETO:}
+  duracion-jwt: ${JWT_DURACION:3600}
+  origen-cors: ${CORS_ORIGEN:http://localhost:4200}
+  usuario-administrador: ${ADMIN_USUARIO:admin}
+  contrasena-administrador: ${ADMIN_CONTRASENA:}

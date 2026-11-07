@@ -1,0 +1,24 @@
+:host { display: block; }
+.resumen-perfil { display: flex; gap: 1.4rem; align-items: center; border-top: 3px solid #1683be; }
+.avatar { display: grid; place-items: center; flex-shrink: 0; width: 72px; height: 72px; border-radius: 20px; background: #e8f3fc; color: #135f94; font-size: 1.6rem; font-weight: 800; }
+.identidad { flex: 1; min-width: 0; }
+.identidad h2 { margin: 0 0 .4rem; font-size: 1.35rem; overflow-wrap: anywhere; }
+.identidad p { margin: 0 0 .7rem; overflow-wrap: anywhere; }
+.estado-cuenta { font-size: .78rem; font-weight: 700; color: #236849; background: #eaf8f1; padding: .3rem .6rem; border-radius: 20px; }
+.roles-cuenta { max-width: 45%; border-left: 1px solid #e2e9ee; padding-left: 1.4rem; }
+.roles-cuenta h3 { font-size: .85rem; margin: 0 0 .7rem; color: #43566a; }
+.roles-cuenta p { font-size: .78rem; margin: .8rem 0 0; line-height: 1.5; }
+.etiquetas { display: flex; gap: .45rem; flex-wrap: wrap; }
+.insignia { line-height: 1.5; }
+.distribucion-catalogo { gap: 1.5rem; grid-template-columns: repeat(2, minmax(0,1fr)); }
+.formulario { max-width: none; min-width: 0; gap: 1.1rem; }
+.titulo-seccion { padding-bottom: 1rem; border-bottom: 1px solid #e8edf2; }
+.titulo-seccion h2 { margin: .5rem 0; }
+.titulo-seccion p { margin: 0; font-size: .88rem; line-height: 1.6; }
+.ayuda { color: #617086; line-height: 1.5; margin-top: -.6rem; }
+.error-campo { color: #9b3022; margin-top: -.5rem; line-height: 1.5; }
+.pie-formulario { border-top: 1px solid #e8edf2; padding-top: 1.2rem; margin-top: .4rem; }
+.pie-formulario button { width: 100%; }
+button:focus-visible { outline: 3px solid #1683be; outline-offset: 3px; }
+@media(max-width: 1050px) { .distribucion-catalogo { grid-template-columns: minmax(0,1fr); } .resumen-perfil { flex-wrap: wrap; } .roles-cuenta { max-width: none; width: 100%; padding: 1rem 0 0; border-left: 0; border-top: 1px solid #e2e9ee; } }
+@media(max-width: 500px) { .tarjeta { padding: 1rem; } .avatar { width: 54px; height: 54px; font-size: 1.2rem; } .resumen-perfil { gap: 1rem; } }

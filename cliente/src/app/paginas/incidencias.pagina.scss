@@ -1,0 +1,37 @@
+:host { display: block; }
+.cabecera-pagina button { flex-shrink: 0; }
+.formulario { max-width: none; border-top: 3px solid #1683be; }
+.titulo-seccion h2 { margin-top: .4rem; }
+.titulo-seccion p, .herramientas-tabla p { margin: .4rem 0 0; font-size: .88rem; }
+.ayuda { margin: 0; font-size: .85rem; line-height: 1.6; padding: 1rem; border-radius: 10px; background: #f2f7fb; }
+.herramientas-tabla { align-items: end; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.herramientas-tabla select { min-width: 220px; }
+table { font-size: .9rem; }
+th { white-space: nowrap; }
+td { vertical-align: middle; }
+.codigo { color: #116aa7; font-weight: 700; white-space: nowrap; }
+.fecha { white-space: nowrap; color: #52667a; }
+.fecha small { display: block; margin-top: .3rem; }
+.insignia, .estado-caso { display: inline-block; white-space: nowrap; font-size: .78rem; border-radius: 20px; padding: .35rem .65rem; font-weight: 700; }
+.insignia[data-prioridad="P1"] { color: #a12727; background: #ffeded; }
+.insignia[data-prioridad="P2"] { color: #91500e; background: #fff3dd; }
+.insignia[data-prioridad="P3"] { color: #705c11; background: #faf5d8; }
+.estado-caso { background: #eef2f6; color: #52667a; }
+.estado-caso[data-estado="EN_ATENCION"], .estado-caso[data-estado="ASIGNADO"] { color: #135f94; background: #e8f3fc; }
+.estado-caso[data-estado="RESUELTO"], .estado-caso[data-estado="CERRADO"] { color: #236849; background: #eaf8f1; }
+.estado-caso[data-estado="PENDIENTE"] { color: #91500e; background: #fff3dd; }
+.vacio { text-align: center; padding: 2.5rem 1rem; color: #617086; }
+.fila-activa { box-shadow: inset 3px 0 #1683be; }
+.titulo-caso { margin-top: .6rem; font-size: 1.5rem; overflow-wrap: anywhere; }
+.descripcion-caso, .solucion-caso p { white-space: pre-wrap; line-height: 1.7; overflow-wrap: anywhere; }
+.detalles h3 { font-size: 1rem; margin: 1.6rem 0 .8rem; }
+.bloque-accion { background: #f8fafc; border: 1px solid #e2e9ee; padding: 1rem; border-radius: 12px; }
+.en-linea { align-items: end; }
+.en-linea label { flex: 1; min-width: 160px; }
+.en-linea select, .en-linea textarea { width: 100%; }
+.en-linea .campo-amplio { flex: 2; min-width: 230px; }
+.solucion-caso { background: #eaf8f1; border-left: 3px solid #34875d; padding: 1rem; margin-top: 1.5rem; border-radius: 8px; }
+.solucion-caso h3 { margin-top: 0; }
+.metrica { line-height: 1.5; overflow-wrap: anywhere; }
+button:focus-visible { outline: 3px solid #1683be; outline-offset: 3px; }
+@media(max-width:650px) { .cabecera-pagina { flex-wrap: wrap; } .tarjeta { padding: 1rem; } .cerrar { float: none; margin-bottom: 1rem; } .en-linea label, .en-linea .campo-amplio { min-width: 100%; } .paginacion { justify-content: center; } }

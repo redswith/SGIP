@@ -1,0 +1,493 @@
+/* Estilos compartidos de la interfaz SGIP. */
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+:root {
+  font-family: 'DM Sans', Arial, sans-serif;
+  color: #17243a;
+  background: #f3f6fa;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+h1,
+h2,
+h3 {
+  font-family: Manrope, Arial, sans-serif;
+  letter-spacing: -0.03em;
+}
+h1 {
+  font-size: 2rem;
+  margin: 0.2rem 0 0.4rem;
+}
+h2 {
+  font-size: 1.15rem;
+  margin: 0 0 1rem;
+}
+p {
+  color: #617086;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button {
+  border: 0;
+  border-radius: 10px;
+  background: #116aa7;
+  color: #fff;
+  padding: 0.72rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover {
+  background: #0c5689;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.secundario {
+  background: #e8f0f7;
+  color: #185276;
+}
+.secundario:hover {
+  background: #d7e7f2;
+}
+.boton-texto {
+  background: transparent;
+  color: #ccdfeb;
+  text-align: left;
+  padding: 1rem 0;
+}
+.estructura {
+  display: flex;
+  min-height: 100vh;
+}
+.barra-lateral {
+  background: #0d2b43;
+  color: white;
+  width: 245px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.marca {
+  font-family: Manrope;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  margin-bottom: 2.5rem;
+}
+.marca span {
+  font-size: 0.7rem;
+  background: #1d8bbd;
+  border-radius: 6px;
+  padding: 0.3rem 0.4rem;
+  letter-spacing: 0;
+}
+.barra-lateral nav {
+  display: grid;
+  gap: 0.35rem;
+  flex: 1;
+}
+.barra-lateral a {
+  color: #cbdbe5;
+  text-decoration: none;
+  padding: 0.78rem 0.85rem;
+  border-radius: 9px;
+  font-weight: 600;
+}
+.barra-lateral a:hover {
+  background: #1c425e;
+  color: white;
+}
+main {
+  min-width: 0;
+  flex: 1;
+}
+header {
+  height: 72px;
+  background: #fff;
+  border-bottom: 1px solid #e3e9ef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  gap: 1rem;
+}
+header span {
+  color: #567189;
+}
+.contenido {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: auto;
+}
+.cabecera-pagina {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+.cabecera-pagina p {
+  margin: 0;
+}
+.antetitulo {
+  font-size: 0.73rem;
+  letter-spacing: 0.13em;
+  font-weight: 800;
+  color: #0d759d;
+}
+.tarjeta {
+  background: white;
+  border: 1px solid #e2e9ee;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px #142c4709;
+  margin-bottom: 1.25rem;
+}
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+.indicador {
+  display: grid;
+  gap: 0.5rem;
+}
+.indicador span {
+  color: #687b8e;
+}
+.indicador strong {
+  font: 800 2rem Manrope;
+  color: #134f77;
+}
+.dos-columnas {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+.metrica {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #edf1f4;
+  padding: 0.8rem 0;
+  gap: 1rem;
+}
+.formulario {
+  display: grid;
+  gap: 1rem;
+  max-width: 760px;
+}
+.formulario h2 {
+  margin: 0;
+}
+label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #43566a;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #cedae5;
+  border-radius: 9px;
+  padding: 0.7rem 0.8rem;
+  background: #fff;
+  color: #17243a;
+  outline: none;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #1683be;
+  box-shadow: 0 0 0 3px #1683be1c;
+}
+.herramientas-tabla {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.herramientas-tabla h2 {
+  margin: 0;
+}
+.herramientas-tabla input,
+.herramientas-tabla select {
+  max-width: 230px;
+}
+.contenedor-tabla {
+  overflow: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+}
+th,
+td {
+  padding: 0.9rem 0.75rem;
+  border-bottom: 1px solid #e8edf2;
+}
+th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64788b;
+}
+tbody tr:hover {
+  background: #f6fafd;
+  cursor: pointer;
+}
+.insignia {
+  background: #e4f2f9;
+  color: #0b648d;
+  border-radius: 20px;
+  padding: 0.3rem 0.6rem;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+.paginacion,
+.en-linea {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+.paginacion {
+  justify-content: flex-end;
+  padding-top: 1rem;
+}
+.en-linea input,
+.en-linea select {
+  width: auto;
+  min-width: 145px;
+}
+.detalles {
+  margin-top: 1rem;
+}
+.cerrar {
+  float: right;
+}
+.alerta {
+  background: #fff0ee;
+  border: 1px solid #f2b9b0;
+  color: #9b3022;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+.contenedor-ingreso {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: radial-gradient(circle at 20% 0%, #c4e6f4, transparent 35%), #eaf1f6;
+}
+.ingreso {
+  width: min(100%, 430px);
+  padding: 2.5rem;
+  display: grid;
+  gap: 1rem;
+}
+.ingreso p {
+  margin: 0 0 1rem;
+}
+.ingreso h1 {
+  margin: 0;
+}
+.ingreso button {
+  margin-top: 0.4rem;
+}
+@media (max-width: 900px) {
+  .indicadores {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .barra-lateral {
+    width: 195px;
+    padding: 1rem;
+  }
+  header {
+    padding: 0 1rem;
+  }
+  .contenido {
+    padding: 1rem;
+  }
+}
+@media (max-width: 650px) {
+  .estructura {
+    display: block;
+  }
+  .barra-lateral {
+    width: 100%;
+    padding: 0.8rem;
+  }
+  .barra-lateral nav {
+    display: flex;
+    overflow: auto;
+  }
+  .barra-lateral a {
+    white-space: nowrap;
+  }
+  .marca {
+    margin-bottom: 0.5rem;
+  }
+  .barra-lateral .boton-texto {
+    display: none;
+  }
+  header {
+    height: auto;
+    min-height: 60px;
+    font-size: 0.8rem;
+  }
+  .indicadores,
+  .dos-columnas {
+    grid-template-columns: 1fr;
+  }
+  .cabecera-pagina {
+    align-items: flex-start;
+  }
+  .contenido {
+    padding: 0.8rem;
+  }
+}
+.filtros {
+  display: flex;
+  align-items: end;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+.filtros label {
+  min-width: 130px;
+  flex: 1;
+}
+.filtros button {
+  height: 42px;
+}
+.distribucion-catalogo {
+  align-items: start;
+}
+.distribucion-catalogo > div {
+  min-width: 0;
+}
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 500;
+}
+.casilla input {
+  width: auto;
+}
+.fila-activa {
+  background: #e7f3f9;
+}
+.aviso {
+  background: #eaf8f1;
+  border: 1px solid #abdcc4;
+  color: #236849;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+fieldset {
+  border: 1px solid #dce5ec;
+  border-radius: 10px;
+  padding: 1rem;
+  display: grid;
+  gap: 0.6rem;
+}
+legend {
+  font-weight: 700;
+  color: #43566a;
+  padding: 0 0.3rem;
+}
+
+/* Navegación estable: la altura del contenido no modifica los botones. */
+html {
+  scrollbar-gutter: stable;
+}
+.barra-lateral {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  height: 100dvh;
+}
+.barra-lateral .marca,
+.barra-lateral .boton-texto {
+  flex-shrink: 0;
+}
+.barra-lateral nav {
+  min-height: 0;
+  overflow-y: auto;
+  align-content: start;
+  grid-auto-rows: 3.5rem;
+  scrollbar-width: thin;
+}
+.barra-lateral nav a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 3.5rem;
+  line-height: 1.2;
+  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+.barra-lateral nav a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 3px;
+  border-radius: 3px;
+  background: #59c8f5;
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.barra-lateral nav a.seccion-activa {
+  background: #1c425e;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #407497;
+}
+.barra-lateral nav a.seccion-activa::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+.barra-lateral nav a:focus-visible {
+  outline: 2px solid #59c8f5;
+  outline-offset: -2px;
+}
+@media (max-width: 650px) {
+  .barra-lateral {
+    position: static;
+    height: auto;
+  }
+  .barra-lateral nav {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .barra-lateral nav a {
+    flex: 0 0 auto;
+    height: 3rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barra-lateral nav a,
+  .barra-lateral nav a::before {
+    transition: none;
+  }
+}

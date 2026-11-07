@@ -1,0 +1,29 @@
+:host { display: block; }
+.cabecera-pagina button { flex-shrink: 0; }
+.filtros { background: #f8fbfe; gap: 1rem; }
+.filtros label:first-child { flex: 2; }
+.distribucion-catalogo { grid-template-columns: minmax(0,1fr); gap: .25rem; }
+.distribucion-catalogo > section { min-width: 0; }
+.cabecera-resultados, .cabecera-ficha { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.cabecera-resultados h2 { margin: 0; }
+.cabecera-resultados p { margin: .4rem 0 0; font-size: .85rem; }
+.ayuda { font-size: .85rem; color: #617086; line-height: 1.6; }
+table { font-size: .9rem; }
+td { vertical-align: middle; }
+.codigo { white-space: nowrap; color: #116aa7; font-weight: 700; }
+.estado-error { display: inline-block; padding: .35rem .7rem; border-radius: 20px; font-size: .78rem; font-weight: 700; background: #eef2f6; color: #52667a; }
+.estado-error[data-estado="ACTIVO"] { background: #e8f3fc; color: #135f94; }
+.estado-error[data-estado="RESUELTO"] { background: #eaf8f1; color: #236849; }
+.fila-activa { box-shadow: inset 3px 0 #1683be; }
+.vacio { text-align: center; padding: 2.5rem 1rem; color: #617086; }
+.formulario { max-width: none; }
+.cabecera-ficha h2 { margin: .5rem 0 0; overflow-wrap: anywhere; }
+.ficha-error { border-top: 3px solid #1683be; }
+.ficha-error > p, .bloque-conocimiento p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; margin: .6rem 0 0; }
+.bloque-conocimiento { background: #f8fafc; border: 1px solid #e2e9ee; border-radius: 12px; padding: 1.2rem; }
+.temporal { background: #fff9ed; border-color: #eee0bd; }
+.definitiva { background: #f0f9f4; border-color: #c7e4d4; }
+textarea { resize: vertical; min-height: 90px; }
+button:focus-visible { outline: 3px solid #1683be; outline-offset: 3px; }
+@media(min-width: 1000px) { .ficha-error { grid-template-columns: repeat(2,minmax(0,1fr)); } .ficha-error > .cabecera-ficha, .ficha-error > p, .ficha-error > small { grid-column: 1 / -1; } }
+@media(max-width: 600px) { .cabecera-pagina { flex-wrap: wrap; } .tarjeta { padding: 1rem; } .filtros label { min-width: 100%; } .cabecera-ficha { align-items: flex-start; } }

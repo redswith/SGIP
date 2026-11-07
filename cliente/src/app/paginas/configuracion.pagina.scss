@@ -1,0 +1,25 @@
+:host { display:block; }
+.cabecera-pagina button { flex-shrink:0; }
+.distribucion-catalogo { grid-template-columns:minmax(0,1fr); gap:.25rem; }
+.distribucion-catalogo > section { min-width:0; }
+.cabecera-inventario,.cabecera-ficha { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
+.cabecera-inventario h2 { margin:0; }
+.cabecera-inventario span { font-size:.85rem; color:#617086; }
+.filtros-inventario { display:grid; grid-template-columns:2fr 1fr; gap:1rem; margin:1.5rem 0; }
+table { font-size:.9rem; } td { vertical-align:middle; }
+.codigo { white-space:nowrap; color:#116aa7; font-weight:700; }
+.ubicacion { display:block; color:#617086; margin-top:.4rem; }
+.estado-elemento { display:inline-block; white-space:nowrap; border-radius:20px; padding:.35rem .65rem; font-size:.78rem; font-weight:700; background:#eef2f6; color:#52667a; }
+.estado-elemento[data-estado="ACTIVO"] { color:#236849; background:#eaf8f1; }
+.estado-elemento[data-estado="EN_MANTENIMIENTO"] { color:#91500e; background:#fff3dd; }
+.fila-activa { box-shadow:inset 3px 0 #1683be; }
+.vacio { text-align:center; color:#617086; padding:2.5rem 1rem; }
+.formulario { max-width:none; } .ficha-elemento { border-top:3px solid #1683be; }
+.cabecera-ficha h2 { margin:.5rem 0 0; overflow-wrap:anywhere; }
+.ficha-elemento p { line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; margin:.5rem 0; }
+.datos-tecnicos { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; background:#f8fafc; padding:1.2rem; border:1px solid #e2e9ee; border-radius:12px; margin:0; }
+dt { font-size:.8rem; color:#617086; } dd { margin:.4rem 0 0; font-weight:600; overflow-wrap:anywhere; }
+h3 { font-size:1rem; margin:1rem 0 0; }
+.en-linea { align-items:end; } .en-linea label { flex:1; min-width:180px; } .en-linea select { width:100%; }
+textarea { resize:vertical; } button:focus-visible { outline:3px solid #1683be; outline-offset:3px; }
+@media(max-width:650px) { .cabecera-pagina { flex-wrap:wrap; } .filtros-inventario,.datos-tecnicos { grid-template-columns:1fr; } .tarjeta { padding:1rem; } .en-linea label { min-width:100%; } }

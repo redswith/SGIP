@@ -1,0 +1,26 @@
+:host { display:block; }
+.titulo-filtros { flex:0 0 100%; }
+.titulo-filtros h2 { margin:0 0 .5rem; }
+.titulo-filtros p { margin:0; font-size:.85rem; line-height:1.6; }
+.filtros { gap:1rem; background:#fbfdff; }
+.filtros label { min-width:150px; }
+.acciones-filtros { display:flex; gap:.65rem; flex-wrap:wrap; width:100%; padding-top:.6rem; border-top:1px solid #e8edf2; }
+.acciones-filtros button { height:auto; }
+.indicadores { gap:1rem; margin-top:1.5rem; }
+.indicador { padding:1.25rem; border-top:3px solid #87bbd8; gap:.7rem; }
+.indicador:first-child { background:#eef7fd; border-top-color:#116aa7; }
+.indicador strong { font-family:Arial,sans-serif; font-size:2.3rem; }
+.indicador span { color:#43566a; font-weight:600; font-size:.88rem; }
+.indicador small { color:#617086; font-size:.74rem; line-height:1.4; }
+.dos-columnas { grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.25rem; }
+.dos-columnas section { min-width:0; }
+.metrica { border:0; padding:.9rem 0 .45rem; font-size:.9rem; }
+.metrica span { overflow-wrap:anywhere; color:#43566a; }
+.metrica strong { color:#134f77; }
+.pista-barra { height:8px; border-radius:20px; background:#edf2f7; margin-bottom:.7rem; overflow:hidden; }
+.barra { height:100%; background:#2487ba; border-radius:20px; }
+.sin-datos { text-align:center; padding:1.5rem .5rem; color:#617086; line-height:1.6; font-size:.88rem; }
+button:focus-visible { outline:3px solid #1683be; outline-offset:3px; }
+@media(max-width:1100px) { .indicadores { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) { .dos-columnas { grid-template-columns:1fr; } .tarjeta { padding:1rem; } }
+@media(max-width:400px) { .indicadores { grid-template-columns:1fr; } }

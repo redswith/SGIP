@@ -1,0 +1,21 @@
+:host { display:block; }
+.distribucion-catalogo { grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr); gap:1.5rem; }
+.distribucion-catalogo > section { min-width:0; }
+.cabecera-listado { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.8rem; }
+.cabecera-listado h2 { margin:0; } .cabecera-listado span { color:#617086; font-size:.85rem; }
+.filtros-categorias { display:grid; grid-template-columns:2fr 1fr; gap:1rem; margin:1.5rem 0; }
+table { font-size:.9rem; } td { vertical-align:middle; } td small { display:block; color:#617086; margin-top:.4rem; }
+.estado-categoria { display:inline-block; white-space:nowrap; background:#eaf8f1; color:#236849; border-radius:20px; padding:.35rem .65rem; font-size:.78rem; font-weight:700; }
+.estado-categoria.inactiva { background:#eef2f6; color:#52667a; }
+.fila-activa { box-shadow:inset 3px 0 #1683be; }
+.vacio { text-align:center; padding:2.5rem 1rem; color:#617086; }
+.formulario { max-width:none; border-top:3px solid #1683be; }
+.titulo-formulario { border-bottom:1px solid #e2e9ee; padding-bottom:1rem; }
+.titulo-formulario h2 { margin:.5rem 0; }
+.titulo-formulario p { margin:0; font-size:.88rem; line-height:1.6; }
+.ayuda { font-size:.82rem; line-height:1.6; background:#f2f7fb; padding:1rem; border-radius:10px; margin:0; }
+.casilla { padding:.8rem; background:#f8fafc; border-radius:10px; }
+.casilla input { width:18px; height:18px; accent-color:#116aa7; }
+button:focus-visible { outline:3px solid #1683be; outline-offset:3px; }
+@media(max-width:1150px) { .distribucion-catalogo { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:500px) { .filtros-categorias { grid-template-columns:1fr; } .tarjeta { padding:1rem; } }

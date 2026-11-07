@@ -1,0 +1,32 @@
+:host { display: block; }
+.cabecera-pagina button { flex-shrink: 0; }
+.bandeja { padding: 0; overflow: hidden; }
+.resumen { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.5rem; flex-wrap: wrap; }
+.resumen h2 { margin-bottom: .4rem; }
+.resumen p { margin: 0; font-size: .85rem; }
+.contador { border-radius: 20px; padding: .55rem .85rem; font-size: .8rem; color: #135f94; background: #e8f3fc; font-weight: 700; }
+.filtros-lectura { display: flex; gap: .5rem; padding: 0 1.5rem 1.25rem; flex-wrap: wrap; border-bottom: 1px solid #e2e9ee; }
+.filtros-lectura button { background: #f2f5f8; color: #52667a; font-size: .85rem; border: 1px solid transparent; transition: background-color 160ms ease; }
+.filtros-lectura button.activo { color: #135f94; background: #e8f3fc; border-color: #8fbad6; }
+.filtros-lectura span { display: inline-block; margin-left: .4rem; min-width: 1.4rem; padding: .1rem .25rem; background: #fff; border-radius: 5px; }
+.lista-notificaciones { list-style: none; padding: 0; margin: 0; }
+.notificacion { display: flex; align-items: center; gap: 1rem; padding: 1.4rem 1.5rem; border-bottom: 1px solid #e8edf2; border-left: 3px solid transparent; }
+.notificacion:last-child { border-bottom: 0; }
+.notificacion.pendiente { background: #f4faff; border-left-color: #1683be; }
+.indicador-lectura { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: #eef2f6; color: #617086; font-weight: 700; }
+.pendiente .indicador-lectura { background: #dceffc; color: #116aa7; font-size: 1.5rem; }
+.contenido-notificacion { min-width: 0; flex: 1; }
+.metadatos { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; font-size: .75rem; color: #617086; }
+.estado-lectura { font-weight: 700; }
+.pendiente .estado-lectura { color: #116aa7; }
+.contenido-notificacion p { color: #33485d; margin: .5rem 0 0; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
+.pendiente p { font-weight: 600; color: #17243a; }
+.notificacion button { flex-shrink: 0; font-size: .8rem; }
+.estado-bandeja { padding: 3rem 1.5rem; text-align: center; }
+.estado-bandeja h3 { font-size: 1.1rem; margin: 1rem 0 .5rem; }
+.estado-bandeja p { margin: 0; line-height: 1.6; font-size: .9rem; }
+.icono-vacio { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; color: #236849; background: #eaf8f1; font-size: 1.4rem; }
+button:focus-visible { outline: 3px solid #1683be; outline-offset: 3px; }
+@media(max-width: 750px) { .notificacion { flex-wrap: wrap; gap: .75rem; padding: 1rem; } .notificacion button { margin-left: 46px; } .contenido-notificacion { flex-basis: calc(100% - 50px); } .resumen { padding: 1rem; } .filtros-lectura { padding: 0 1rem 1rem; } }
+@media(max-width: 500px) { .cabecera-pagina { flex-wrap: wrap; } }
+@media(prefers-reduced-motion: reduce) { .filtros-lectura button { transition: none; } }

@@ -1,0 +1,25 @@
+:host { display:block; }
+.cabecera-pagina button { flex-shrink:0; }
+.cabecera-registro { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+.cabecera-registro h2 { margin:0 0 .5rem; }
+.cabecera-registro p,.ayuda { color:#617086; font-size:.82rem; line-height:1.6; }
+.cabecera-registro p { margin:0; }
+.contador { border-radius:20px; background:#e8f3fc; color:#135f94; font-size:.78rem; padding:.5rem .8rem; font-weight:700; }
+.busqueda { max-width:620px; }
+.ayuda { margin:.6rem 0 1.5rem; }
+table { font-size:.88rem; } td { vertical-align:top; }
+.fecha { white-space:nowrap; font-weight:600; } .fecha small { display:block; color:#617086; font-weight:400; margin-top:.4rem; }
+.accion { display:inline-block; background:#eef4fa; color:#185276; padding:.35rem .65rem; border-radius:8px; font-weight:600; }
+summary { color:#116aa7; cursor:pointer; font-weight:600; white-space:nowrap; }
+.detalle-evento { min-width:180px; max-width:350px; white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.6; color:#43566a; padding:.8rem; background:#f8fafc; border-radius:8px; }
+tbody tr:hover { cursor:default; }
+.vacio { text-align:center; padding:2.5rem 1rem; color:#617086; }
+.paginacion { border-top:1px solid #e8edf2; margin-top:1rem; }
+button:focus-visible,summary:focus-visible { outline:3px solid #1683be; outline-offset:3px; }
+@media(max-width:650px) { .cabecera-pagina { flex-wrap:wrap; } .tarjeta { padding:1rem; } .paginacion { justify-content:center; } }
+
+.filtros-fecha { display:flex; align-items:end; flex-wrap:wrap; gap:1rem; padding:1rem; background:#f8fafc; border-radius:12px; }
+.filtros-fecha label { flex:1; min-width:160px; }
+
+.opciones-auditoria { display:flex; align-items:end; gap:1rem; flex-wrap:wrap; }
+.opciones-auditoria label { flex:1; min-width:180px; }

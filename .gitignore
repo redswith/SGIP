@@ -1,0 +1,14 @@
+.env
+servidor/target/
+cliente/node_modules/
+cliente/dist/
+*.log
+.tools/
+maven.zip
+
+cliente/.angular/
+cliente/coverage/
+*.dump
+*.backup
+.env.*
+!.env.ejemplo

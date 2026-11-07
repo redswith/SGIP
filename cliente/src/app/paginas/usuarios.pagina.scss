@@ -1,0 +1,31 @@
+:host { display: block; }
+.distribucion-catalogo { grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr); gap: 1.5rem; }
+.distribucion-catalogo > section { min-width: 0; }
+.encabezado-listado { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.3rem; }
+.encabezado-listado h2 { margin-bottom: .35rem; }
+.encabezado-listado p, .titulo-formulario p { margin: 0; font-size: .88rem; line-height: 1.5; }
+.encabezado-listado button { flex-shrink: 0; }
+.busqueda { margin-bottom: 1.4rem; }
+table { font-size: .88rem; }
+th { white-space: nowrap; }
+td { vertical-align: middle; }
+.correo-usuario { display: block; color: #617086; font-size: .8rem; margin-top: .35rem; overflow-wrap: anywhere; }
+.estado-usuario { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .65rem; border-radius: 20px; background: #eaf8f1; color: #236849; font-size: .78rem; font-weight: 700; }
+.estado-usuario::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.estado-usuario.inactivo { color: #6a5660; background: #f2edf0; }
+.fila-activa { box-shadow: inset 3px 0 #1683be; }
+tbody tr { transition: background-color 160ms ease; }
+.formulario { max-width: none; gap: 1.15rem; }
+.titulo-formulario { border-bottom: 1px solid #e8edf2; padding-bottom: 1rem; }
+.titulo-formulario h2 { margin: .4rem 0; overflow-wrap: anywhere; }
+.formulario > p { margin: 0; font-size: .88rem; line-height: 1.6; }
+fieldset { min-width: 0; background: #f8fafc; gap: .5rem; }
+.ayuda-roles { margin: 0 0 .5rem; font-size: .82rem; }
+fieldset .casilla { padding: .7rem; border: 1px solid #e2e9ee; border-radius: 8px; background: white; cursor: pointer; }
+fieldset .casilla:has(input:checked) { border-color: #87bbd8; background: #eaf5fc; color: #134f77; }
+.casilla input { width: 18px; height: 18px; accent-color: #116aa7; flex-shrink: 0; }
+button:focus-visible { outline: 3px solid #1683be; outline-offset: 3px; }
+.sin-resultados { text-align: center; padding: 2rem 1rem; color: #617086; }
+@media (max-width: 1150px) { .distribucion-catalogo { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 500px) { .tarjeta { padding: 1rem; } .encabezado-listado { align-items: flex-start; flex-direction: column; } }
+@media (prefers-reduced-motion: reduce) { tbody tr { transition: none; } }
