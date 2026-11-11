@@ -20,18 +20,48 @@ import org.springframework.jdbc.core.JdbcTemplate;
     Usuario actor(Authentication autenticacion) { return usuarios.buscarPorNombreUsuario(autenticacion.getName()).orElseThrow(); }
     boolean esPersonal(Usuario u) { return u.roles.stream().anyMatch(r -> !r.equals("USUARIO")); }
     void verificarLectura(Incidencia i,Usuario u) { if (!esPersonal(u) && !i.solicitanteId.equals(u.id)) throw new ResponseStatusException(HttpStatus.FORBIDDEN); }
-    @Transactional public Incidencia crear(ControladorIncidencias.Creacion r,Authentication autenticacion) {
+    @Transactional public Incidencia crear(CreacionIncidencia r,Authentication autenticacion) {
         Usuario u=actor(autenticacion);validarCategoria(r.categoriaId());var i=new Incidencia();i.titulo=r.titulo();i.descripcion=r.descripcion();i.solicitanteId=u.id;i.categoriaId=r.categoriaId();i.impacto=r.impacto();i.urgencia=r.urgencia();i.prioridad=politica.calcular(i.impacto,i.urgencia);i.estado="NUEVO";incidencias.save(i);i.codigo="INC-%06d".formatted(i.id);log(i,u,"REGISTRO",null,i.estado,null);actividad.notificar(u.id,"Se registró la incidencia "+i.codigo);return incidencias.save(i);
     }
-    @Transactional(readOnly=true) public Page<Incidencia> listar(String estado,Pageable pagina,Authentication autenticacion) {
-        Usuario u=actor(autenticacion);
-        return incidencias.findAll((root,query,cb) -> { var p=cb.conjunction();if(estado!=null&&!estado.isBlank())p=cb.and(p,cb.equal(root.get("estado"),estado));if(!esPersonal(u))p=cb.and(p,cb.equal(root.get("solicitanteId"),u.id));return p; },pagina);
+    @Transactional(readOnly=true)
+    public Page<Incidencia> listar(String estado, String consulta, Pageable pagina, Authentication autenticacion) {
+        Usuario usuario = actor(autenticacion);
+        String busqueda = consulta == null ? "" : consulta.strip().toLowerCase(java.util.Locale.ROOT);
+        var ordenada = org.springframework.data.domain.PageRequest.of(pagina.getPageNumber(),
+            Math.min(100, pagina.getPageSize()), org.springframework.data.domain.Sort.by("id").descending());
+        return incidencias.findAll((raiz, query, criterios) -> {
+            var condiciones = criterios.conjunction();
+            if (estado != null && !estado.isBlank()) condiciones = criterios.and(condiciones, criterios.equal(raiz.get("estado"), estado));
+            if (!esPersonal(usuario)) condiciones = criterios.and(condiciones, criterios.equal(raiz.get("solicitanteId"), usuario.id));
+            if (!busqueda.isEmpty()) condiciones = criterios.and(condiciones, criterios.or(
+                criterios.greaterThan(criterios.locate(criterios.lower(raiz.get("codigo")), busqueda), 0),
+                criterios.greaterThan(criterios.locate(criterios.lower(raiz.get("titulo")), busqueda), 0)));
+            return condiciones;
+        }, ordenada);
+    }
+
+    @Transactional(readOnly=true)
+    public List<String> estadosDisponibles(Long id, Authentication autenticacion) {
+        var incidencia = obtener(id, autenticacion);
+        return PoliticaEstadosIncidencia.puedeAtender(incidencia, actor(autenticacion))
+            ? PoliticaEstadosIncidencia.siguientes(incidencia.estado) : List.of();
     }
     @Transactional(readOnly=true) public Incidencia obtener(Long id,Authentication autenticacion) { var i=incidencias.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));verificarLectura(i,actor(autenticacion));return i; }
     @Transactional public Incidencia asignar(Long id,Long asignadoId,Authentication autenticacion) {
         var u=actor(autenticacion);exigirPersonal(u);var i=obtener(id,autenticacion);var asignado=usuarios.findById(asignadoId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Técnico inexistente"));
         if (!asignado.activo || asignado.roles.stream().noneMatch(r -> r.equals("TECNICO")||r.equals("ADMINISTRADOR"))) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"El usuario no es técnico activo");
-        var anterior=i.asignadoId;i.asignadoId=asignadoId;i.asignadoEn=Instant.now();i.estado="ASIGNADO";log(i,u,anterior==null?"ASIGNACION":"REASIGNACION",String.valueOf(anterior),String.valueOf(asignadoId),null);actividad.notificar(asignadoId,"Se te asignó la incidencia "+i.codigo);return incidencias.save(i);
+        if (!List.of("NUEVO", "ASIGNADO", "EN_ATENCION", "PENDIENTE").contains(i.estado)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Solo se pueden asignar incidencias abiertas. Reabra una incidencia resuelta antes de reasignarla.");
+        }
+        var anterior = i.asignadoId;
+        i.asignadoId = asignadoId;
+        i.asignadoEn = Instant.now();
+        if (i.estado.equals("NUEVO")) {
+            i.estado = "ASIGNADO";
+            log(i, u, "CAMBIO_ESTADO", "NUEVO", "ASIGNADO", "Asignación inicial");
+        }
+        log(i,u,anterior==null?"ASIGNACION":"REASIGNACION",String.valueOf(anterior),String.valueOf(asignadoId),null);actividad.notificar(asignadoId,"Se te asignó la incidencia "+i.codigo);return incidencias.save(i);
     }
     @Transactional public Incidencia clasificar(Long id,Long categoriaId,String impacto,String urgencia,Authentication autenticacion) {
         var u=actor(autenticacion);exigirPersonal(u);validarCategoria(categoriaId);var i=obtener(id,autenticacion);String antes=i.categoriaId+"/"+i.impacto+"/"+i.urgencia+"/"+i.prioridad;
@@ -41,12 +71,17 @@ import org.springframework.jdbc.core.JdbcTemplate;
     private void validarCategoria(Long id) {if(id!=null && jdbc.queryForObject("SELECT count(*) FROM categorias WHERE id=? AND activo=true",Long.class,id)==0)throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Categoría inexistente o inactiva");}
     @Transactional public Incidencia cambiarEstado(Long id,String siguiente,String solucion,Authentication autenticacion) {
         var u=actor(autenticacion);exigirPersonal(u);var i=obtener(id,autenticacion);var anterior=i.estado;
-        if(u.roles.contains("TECNICO") && u.roles.stream().noneMatch(r -> List.of("ADMINISTRADOR","MESA_SERVICIO","GESTOR_INCIDENTES").contains(r)) && !u.id.equals(i.asignadoId))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"La incidencia no está asignada a este técnico");
-        boolean permitido=switch(anterior) { case "NUEVO" -> List.of("CANCELADO").contains(siguiente);case "ASIGNADO" -> List.of("EN_ATENCION","PENDIENTE","CANCELADO").contains(siguiente);case "EN_ATENCION" -> List.of("PENDIENTE","RESUELTO").contains(siguiente);case "PENDIENTE" -> List.of("EN_ATENCION","RESUELTO").contains(siguiente);case "RESUELTO" -> List.of("CERRADO","EN_ATENCION").contains(siguiente);default -> false; };
+        if (!PoliticaEstadosIncidencia.puedeAtender(i, u))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para atender esta incidencia");
+        boolean permitido = PoliticaEstadosIncidencia.siguientes(anterior).contains(siguiente);
         if (!permitido) throw new ResponseStatusException(HttpStatus.CONFLICT,"Transición de estado inválida");
         if (siguiente.equals("RESUELTO") && (solucion==null||solucion.isBlank())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Indique la solución");
-        i.estado=siguiente;if(siguiente.equals("RESUELTO")){i.solucion=solucion;i.resueltoEn=Instant.now();}if(siguiente.equals("CERRADO"))i.cerradoEn=Instant.now();log(i,u,"CAMBIO_ESTADO",anterior,siguiente,solucion);actividad.notificar(i.solicitanteId,"La incidencia "+i.codigo+" cambió a "+siguiente);return incidencias.save(i);
+        i.estado=siguiente;
+        if (anterior.equals("RESUELTO") && siguiente.equals("EN_ATENCION")) {
+            i.resueltoEn = null;
+            i.solucion = null;
+        }
+        if(siguiente.equals("RESUELTO")){i.solucion=solucion;i.resueltoEn=Instant.now();}if(siguiente.equals("CERRADO"))i.cerradoEn=Instant.now();log(i,u,"CAMBIO_ESTADO",anterior,siguiente,solucion);actividad.notificar(i.solicitanteId,"La incidencia "+i.codigo+" cambió a "+siguiente);return incidencias.save(i);
     }
     @Transactional public ComentarioIncidencia comentar(Long id,String texto,String visibilidad,Authentication autenticacion) {
         var u=actor(autenticacion);var i=obtener(id,autenticacion);if(texto==null||texto.isBlank())throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Comentario vacío");if(!List.of("PUBLICO","INTERNO").contains(visibilidad))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Visibilidad inválida");if(!esPersonal(u)&&visibilidad.equals("INTERNO"))throw new ResponseStatusException(HttpStatus.FORBIDDEN);

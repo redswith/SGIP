@@ -13,9 +13,13 @@ public class ControladorReportes {
     private final JdbcTemplate jdbc;
     public ControladorReportes(JdbcTemplate jdbc){this.jdbc=jdbc;}
     @GetMapping("/panel") public Map<String,Object> panel(@RequestParam(required=false) LocalDate desde,@RequestParam(required=false) LocalDate hasta,@RequestParam(required=false) String estado,@RequestParam(required=false) Long categoriaId,@RequestParam(required=false) String prioridad,@RequestParam(required=false) Long asignadoId){
+        if (desde != null && hasta != null && desde.isAfter(hasta))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,
+                "La fecha inicial no puede ser posterior a la fecha final");
+        var zona = java.time.ZoneId.of("America/Lima");
         StringBuilder condiciones=new StringBuilder(" WHERE 1=1");List<Object> argumentos=new ArrayList<>();
-        if(desde!=null){condiciones.append(" AND creado_en >= ?");argumentos.add(desde.atStartOfDay());}
-        if(hasta!=null){condiciones.append(" AND creado_en < ?");argumentos.add(hasta.plusDays(1).atStartOfDay());}
+        if(desde!=null){condiciones.append(" AND creado_en >= ?");argumentos.add(java.sql.Timestamp.from(desde.atStartOfDay(zona).toInstant()));}
+        if(hasta!=null){condiciones.append(" AND creado_en < ?");argumentos.add(java.sql.Timestamp.from(hasta.plusDays(1).atStartOfDay(zona).toInstant()));}
         if(estado!=null&&!estado.isBlank()){condiciones.append(" AND estado = ?");argumentos.add(estado);}
         if(categoriaId!=null){condiciones.append(" AND categoria_id = ?");argumentos.add(categoriaId);}
         if(prioridad!=null&&!prioridad.isBlank()){condiciones.append(" AND prioridad = ?");argumentos.add(prioridad);}

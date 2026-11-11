@@ -1,3 +1,4 @@
+import { SelectorIncidencias } from '../componentes/selector-incidencias';
 import { EtiquetaEspanolPipe } from '../nucleo/etiqueta-espanol.pipe';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
@@ -19,13 +20,16 @@ interface Problema {
 @Component({
   standalone: true,
   styleUrl: './problemas.pagina.scss',
-  imports: [EtiquetaEspanolPipe, ReactiveFormsModule, DatePipe],
+  imports: [SelectorIncidencias, EtiquetaEspanolPipe, ReactiveFormsModule, DatePipe],
   template: ` <div class="cabecera-pagina">
       <div>
         <div class="antetitulo">ANÁLISIS</div>
         <h1>Problemas</h1>
         <p>Investiga causas y vincula incidencias recurrentes.</p>
-      </div>@if (puedeGestionar()) { <button (click)="nuevo()">Nuevo problema</button> }
+      </div>
+      @if (puedeGestionar()) {
+        <button [disabled]="guardando()" (click)="nuevo()">Nuevo problema</button>
+      }
     </div>
     @if (error()) {
       <div class="alerta" role="alert">{{ error() }}</div>
@@ -35,8 +39,31 @@ interface Problema {
     }
     <div class="dos-columnas distribucion-catalogo">
       <section class="tarjeta">
-        <div class="cabecera-listado"><h2>Problemas registrados</h2><span>{{ filtrados().length }} de {{ elementos().length }} registros</span></div>
-        <div class="filtros-problemas"><label>Buscar problema<input type="search" placeholder="Código o título" [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" /></label><label>Estado<select [value]="filtroEstado()" (change)="filtroEstado.set($any($event.target).value)"><option value="">Todos los estados</option><option value="ABIERTO">Abierto</option><option value="EN_INVESTIGACION">En investigación</option><option value="ERROR_CONOCIDO">Error conocido</option><option value="RESUELTO">Resuelto</option><option value="CERRADO">Cerrado</option></select></label></div>
+        <div class="cabecera-listado">
+          <h2>Problemas registrados</h2>
+          <span>{{ filtrados().length }} de {{ elementos().length }} registros</span>
+        </div>
+        <div class="filtros-problemas">
+          <label
+            >Buscar problema<input
+              type="search"
+              placeholder="Código o título"
+              [value]="busqueda()"
+              (input)="busqueda.set($any($event.target).value)" /></label
+          ><label
+            >Estado<select
+              [value]="filtroEstado()"
+              (change)="filtroEstado.set($any($event.target).value)"
+            >
+              <option value="">Todos los estados</option>
+              <option value="ABIERTO">Abierto</option>
+              <option value="EN_INVESTIGACION">En investigación</option>
+              <option value="ERROR_CONOCIDO">Error conocido</option>
+              <option value="RESUELTO">Resuelto</option>
+              <option value="CERRADO">Cerrado</option>
+            </select></label
+          >
+        </div>
         <div class="contenedor-tabla">
           <table>
             <thead>
@@ -44,7 +71,8 @@ interface Problema {
                 <th>Código</th>
                 <th>Título</th>
                 <th>Estado</th>
-                <th>Prioridad</th><th>Acciones</th>
+                <th>Prioridad</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -52,11 +80,37 @@ interface Problema {
                 <tr (click)="seleccionar(p)" [class.fila-activa]="seleccionado()?.id === p.id">
                   <td class="codigo">{{ p.codigo }}</td>
                   <td>{{ p.titulo }}</td>
-                  <td><span class="estado-problema" [attr.data-estado]="p.estado">{{ p.estado | etiquetaEspanol }}</span></td>
-                  <td><span class="prioridad" [attr.data-prioridad]="p.prioridad">{{ p.prioridad | etiquetaEspanol }}</span></td><td><button class="secundario" [attr.aria-label]="'Ver problema ' + p.codigo" (click)="$event.stopPropagation(); seleccionar(p)">Ver detalle</button></td>
+                  <td>
+                    <span class="estado-problema" [attr.data-estado]="p.estado">{{
+                      p.estado | etiquetaEspanol
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="prioridad" [attr.data-prioridad]="p.prioridad">{{
+                      p.prioridad | etiquetaEspanol
+                    }}</span>
+                  </td>
+                  <td>
+                    <button
+                      class="secundario"
+                      [attr.aria-label]="'Ver problema ' + p.codigo"
+                      (click)="$event.stopPropagation(); seleccionar(p)"
+                    >
+                      Ver detalle
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="vacio">
+                    {{
+                      cargando()
+                        ? 'Cargando problemas…'
+                        : 'No hay problemas que coincidan con los filtros.'
+                    }}
+                  </td>
                 </tr>
               }
-              @empty { <tr><td colspan="5" class="vacio">{{ cargando() ? 'Cargando problemas…' : 'No hay problemas que coincidan con los filtros.' }}</td></tr> }
             </tbody>
           </table>
         </div>
@@ -64,7 +118,17 @@ interface Problema {
       <div>
         @if (seleccionado(); as p) {
           <section class="tarjeta formulario ficha-problema">
-            <div class="cabecera-ficha"><div><span class="antetitulo">{{ p.codigo }} · INVESTIGACIÓN</span><h2>{{ p.titulo }}</h2></div>@if (puedeGestionar()) { <button class="secundario" (click)="editando.set(!editando())">{{ editando() ? 'Ocultar análisis' : 'Actualizar análisis' }}</button> }</div>
+            <div class="cabecera-ficha">
+              <div>
+                <span class="antetitulo">{{ p.codigo }} · INVESTIGACIÓN</span>
+                <h2>{{ p.titulo }}</h2>
+              </div>
+              @if (puedeGestionar()) {
+                <button class="secundario" (click)="editando.set(!editando())">
+                  {{ editando() ? 'Ocultar análisis' : 'Actualizar análisis' }}
+                </button>
+              }
+            </div>
             <p>{{ p.descripcion }}</p>
             <div class="bloque causa">
               <strong>Causa raíz</strong>
@@ -85,14 +149,7 @@ interface Problema {
               <p>Sin incidencias vinculadas.</p>
             }
             @if (puedeGestionar()) {
-              <div class="en-linea">
-                <label>Incidencia a relacionar<select #incidenciaId>
-                  <option value="">Selecciona incidencia</option>
-                  @for (i of incidencias(); track i.id) {
-                    <option [value]="i.id">{{ i.codigo }} · {{ i.titulo }}</option>
-                  }</select
-                ></label><button [disabled]="!incidenciaId.value" (click)="vincular(p.id, incidenciaId.value)">Vincular</button>
-              </div>
+              <app-selector-incidencias (vincular)="vincular(p.id, $event)" />
             }
             <h3>Comentarios</h3>
             @for (c of comentarios(); track c.id) {
@@ -105,10 +162,21 @@ interface Problema {
               <p>Sin comentarios.</p>
             }
             <div class="en-linea">
-              <label class="campo-nota">Comentario<textarea #nota rows="3" placeholder="Documenta avances de la investigación"></textarea></label><label>Visibilidad<select #visibilidad>
-                <option value="INTERNO">Interno</option>
-                <option value="PUBLICO">Público</option></select
-              ></label><button [disabled]="!nota.value.trim() || comentando()" (click)="comentar(p.id, nota, visibilidad.value)">
+              <label class="campo-nota"
+                >Comentario<textarea
+                  #nota
+                  rows="3"
+                  placeholder="Documenta avances de la investigación"
+                ></textarea></label
+              ><label
+                >Visibilidad<select #visibilidad>
+                  <option value="INTERNO">Interno</option>
+                  <option value="PUBLICO">Público</option>
+                </select></label
+              ><button
+                [disabled]="!nota.value.trim() || comentando()"
+                (click)="comentar(p.id, nota, visibilidad.value)"
+              >
                 Agregar
               </button>
             </div>
@@ -122,26 +190,43 @@ interface Problema {
               <h2>Registrar análisis</h2>
               <label
                 >Estado<select formControlName="estado">
-                  <option value="ABIERTO">Abierto</option>
-                  <option value="EN_INVESTIGACION">En investigación</option>
-                  <option value="ERROR_CONOCIDO">Error conocido</option>
-                  <option value="RESUELTO">Resuelto</option>
-                  <option value="CERRADO">Cerrado</option>
+                  @for (estado of estadosDisponibles(p.estado); track estado) {
+                    <option [value]="estado">{{ estado | etiquetaEspanol }}</option>
+                  }
                 </select></label
               ><label>Causa raíz<textarea rows="4" formControlName="causaRaiz"></textarea></label
               ><label
-                >Solución temporal<textarea rows="4" formControlName="solucionTemporal"></textarea></label
+                >Solución temporal<textarea
+                  rows="4"
+                  formControlName="solucionTemporal"
+                ></textarea></label
               ><label
                 >Solución definitiva<textarea
                   formControlName="solucionDefinitiva"
                 ></textarea></label
-              ><button>Guardar análisis</button>
+              ><button [disabled]="guardando()">
+                {{ guardando() ? 'Guardando…' : 'Guardar análisis' }}
+              </button>
             </form>
           }
         }
         @if (puedeGestionar() && creando()) {
           <form class="tarjeta formulario" [formGroup]="formularioCreacion" (ngSubmit)="crear()">
-            <div class="cabecera-ficha"><div><span class="antetitulo">NUEVO REGISTRO</span><h2>Registrar problema</h2></div><button type="button" class="secundario" (click)="creando.set(false)">Cancelar</button></div><p>Describe el problema que se investigará y su prioridad.</p>
+            <div class="cabecera-ficha">
+              <div>
+                <span class="antetitulo">NUEVO REGISTRO</span>
+                <h2>Registrar problema</h2>
+              </div>
+              <button
+                type="button"
+                class="secundario"
+                [disabled]="guardando()"
+                (click)="creando.set(false)"
+              >
+                Cancelar
+              </button>
+            </div>
+            <p>Describe el problema que se investigará y su prioridad.</p>
             <label>Título<input formControlName="titulo" /></label
             ><label>Descripción<textarea rows="4" formControlName="descripcion"></textarea></label
             ><label
@@ -151,7 +236,7 @@ interface Problema {
                 <option value="P3">P3 · Media</option>
                 <option value="P4">P4 · Baja</option>
               </select></label
-            ><button [disabled]="formularioCreacion.invalid">Registrar</button>
+            ><button [disabled]="formularioCreacion.invalid || guardando()">Registrar</button>
           </form>
         }
       </div>
@@ -163,20 +248,25 @@ export class PaginaProblemas implements OnInit {
   autenticacion = inject(ServicioAutenticacion);
   elementos = signal<Problema[]>([]);
   seleccionado = signal<Problema | null>(null);
-  incidencias = signal<any[]>([]);
   incidenciasVinculadas = signal<number[]>([]);
   comentarios = signal<any[]>([]);
   creando = signal(false);
   editando = signal(false);
+  guardando = signal(false);
   cargando = signal(false);
   comentando = signal(false);
   busqueda = signal('');
   filtroEstado = signal('');
   filtrados() {
     const texto = this.busqueda().trim().toLocaleLowerCase('es');
-    return this.elementos().filter(p => (!this.filtroEstado() || p.estado === this.filtroEstado()) && (p.codigo + ' ' + p.titulo).toLocaleLowerCase('es').includes(texto));
+    return this.elementos().filter(
+      (p) =>
+        (!this.filtroEstado() || p.estado === this.filtroEstado()) &&
+        (p.codigo + ' ' + p.titulo).toLocaleLowerCase('es').includes(texto),
+    );
   }
   nuevo() {
+    if (this.guardando()) return;
     this.seleccionado.set(null);
     this.creando.set(true);
     this.editando.set(false);
@@ -196,12 +286,18 @@ export class PaginaProblemas implements OnInit {
     solucionTemporal: [''],
     solucionDefinitiva: [''],
   });
+  estadosDisponibles(estado: string): string[] {
+    const transiciones: Record<string, string[]> = {
+      ABIERTO: ['EN_INVESTIGACION'],
+      EN_INVESTIGACION: ['ERROR_CONOCIDO', 'RESUELTO'],
+      ERROR_CONOCIDO: ['EN_INVESTIGACION', 'RESUELTO'],
+      RESUELTO: ['EN_INVESTIGACION', 'CERRADO'],
+      CERRADO: [],
+    };
+    return [estado, ...(transiciones[estado] || [])];
+  }
   ngOnInit() {
     this.cargar();
-    if (this.puedeGestionar())
-      this.api
-        .obtener<{ contenido: any[] }>('/incidencias', { tamano: 100 })
-        .subscribe((v) => this.incidencias.set(v.contenido));
   }
   puedeGestionar() {
     return (
@@ -211,14 +307,19 @@ export class PaginaProblemas implements OnInit {
   }
   cargar() {
     this.cargando.set(true);
-    this.api
-      .obtener<Problema[]>('/problemas')
-      .subscribe({
-        next: (r) => { this.elementos.set(r); this.cargando.set(false); },
-        error: () => { this.cargando.set(false); this.error.set('No se pudieron cargar problemas.'); },
-      });
+    this.api.obtener<Problema[]>('/problemas').subscribe({
+      next: (r) => {
+        this.elementos.set(r);
+        this.cargando.set(false);
+      },
+      error: () => {
+        this.cargando.set(false);
+        this.error.set('No se pudieron cargar problemas.');
+      },
+    });
   }
   seleccionar(p: Problema) {
+    if (this.guardando()) return;
     this.creando.set(false);
     this.editando.set(false);
     this.incidenciasVinculadas.set([]);
@@ -233,37 +334,64 @@ export class PaginaProblemas implements OnInit {
     this.refrescar(p.id);
   }
   refrescar(id: number) {
-    this.api
-      .obtener<number[]>(`/problemas/${id}/incidencias`)
-      .subscribe({ next: (v) => { if (this.seleccionado()?.id === id) this.incidenciasVinculadas.set(v); }, error: () => this.error.set('No se pudieron cargar las incidencias vinculadas.') });
-    this.api
-      .obtener<any[]>(`/problemas/${id}/comentarios`)
-      .subscribe({ next: (v) => { if (this.seleccionado()?.id === id) this.comentarios.set(v); }, error: () => this.error.set('No se pudieron cargar los comentarios.') });
+    this.api.obtener<number[]>(`/problemas/${id}/incidencias`).subscribe({
+      next: (v) => {
+        if (this.seleccionado()?.id === id) this.incidenciasVinculadas.set(v);
+      },
+      error: () => this.error.set('No se pudieron cargar las incidencias vinculadas.'),
+    });
+    this.api.obtener<any[]>(`/problemas/${id}/comentarios`).subscribe({
+      next: (v) => {
+        if (this.seleccionado()?.id === id) this.comentarios.set(v);
+      },
+      error: () => this.error.set('No se pudieron cargar los comentarios.'),
+    });
   }
   crear() {
-    if (this.formularioCreacion.invalid) return;
+    if (this.formularioCreacion.invalid || this.guardando()) return;
+    this.guardando.set(true);
+    this.formularioCreacion.disable();
     this.api.crear<Problema>('/problemas', this.formularioCreacion.getRawValue()).subscribe({
       next: (p) => {
+        this.guardando.set(false);
+        this.formularioCreacion.enable();
+        this.formularioAnalisis.enable();
         this.formularioCreacion.reset({ titulo: '', descripcion: '', prioridad: 'P3' });
         this.cargar();
         this.seleccionar(p);
         this.mensaje.set('Problema registrado.');
         this.error.set('');
       },
-      error: (e) => this.error.set(e.error?.mensaje || 'No se pudo registrar.'),
+      error: (e) => {
+        this.guardando.set(false);
+        this.formularioCreacion.enable();
+        this.formularioAnalisis.enable();
+        this.error.set(e.error?.mensaje || 'No se pudo registrar.');
+      },
     });
   }
   actualizar(id: number) {
+    if (this.guardando()) return;
+    this.guardando.set(true);
+    this.formularioAnalisis.disable();
     this.api
       .modificar<Problema>(`/problemas/${id}`, this.formularioAnalisis.getRawValue())
       .subscribe({
         next: (p) => {
+          this.guardando.set(false);
+          this.formularioCreacion.enable();
+          this.formularioAnalisis.enable();
           this.seleccionar(p);
           this.cargar();
           this.mensaje.set('Análisis actualizado.');
           this.error.set('');
         },
-        error: (e) => this.error.set(e.error?.mensaje || 'No se pudo actualizar.'),
+        error: (e) => {
+          this.guardando.set(false);
+          this.formularioCreacion.enable();
+          this.formularioAnalisis.enable();
+          this.error.set(e.error?.mensaje || 'No se pudo actualizar.');
+        },
       });
   }
   vincular(id: number, incidenciaId: string) {
@@ -289,7 +417,10 @@ export class PaginaProblemas implements OnInit {
         if (campo.value === contenido) campo.value = '';
         this.mensaje.set('Comentario agregado.');
       },
-      error: (e) => { this.comentando.set(false); this.error.set(e.error?.mensaje || 'No se pudo agregar el comentario.'); },
+      error: (e) => {
+        this.comentando.set(false);
+        this.error.set(e.error?.mensaje || 'No se pudo agregar el comentario.');
+      },
     });
   }
 }

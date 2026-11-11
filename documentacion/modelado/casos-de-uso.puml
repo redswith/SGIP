@@ -1,0 +1,69 @@
+@startuml
+left to right direction
+actor "Usuario autenticado" as U
+actor "Administrador" as A
+actor "Mesa de servicio" as M
+actor "Técnico" as T
+actor "Gestor de incidentes" as GI
+actor "Gestor de problemas" as GP
+A --|> U
+M --|> U
+T --|> U
+GI --|> U
+GP --|> U
+rectangle SGIP {
+ usecase "CU01 Iniciar sesión" as C1
+ usecase "CU02 Registrar y consultar
+incidencias propias" as C2
+ usecase "CU03 Clasificar y asignar
+incidencias" as C3
+ usecase "CU04 Atender incidencias" as C4
+ usecase "CU05 Investigar problemas" as C5
+ usecase "CU06 Administrar errores
+conocidos" as C6
+ usecase "CU07 Administrar inventario" as C7
+ usecase "CU08 Crear categorías" as C8
+ usecase "CU09 Editar categorías" as C9
+ usecase "CU10 Gestionar cuentas
+y roles" as C10
+ usecase "CU11 Restablecer contraseña
+de otra cuenta" as C11
+ usecase "CU12 Actualizar perfil
+y contraseña propia" as C12
+ usecase "CU13 Consultar y leer
+notificaciones" as C13
+ usecase "CU14 Consultar panel" as C14
+ usecase "CU15 Consultar auditoría" as C15
+}
+U --> C1
+U --> C2
+U --> C12
+U --> C13
+A --> C3
+M --> C3
+GI --> C3
+A --> C4
+M --> C4
+GI --> C4
+T --> C4
+A --> C5
+GP --> C5
+A --> C6
+GP --> C6
+A --> C7
+M --> C7
+A --> C8
+M --> C8
+A --> C9
+A --> C10
+A --> C11
+A --> C14
+M --> C14
+GI --> C14
+GP --> C14
+A --> C15
+note bottom of C4
+Un técnico sin otros roles actúa
+sobre incidencias asignadas.
+end note
+@enduml

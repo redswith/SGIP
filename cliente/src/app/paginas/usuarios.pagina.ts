@@ -23,51 +23,99 @@ import { Usuario } from '../nucleo/autenticacion.servicio';
     }
     <div class="dos-columnas distribucion-catalogo">
       <section class="tarjeta">
-        <div class="encabezado-listado"><div><h2>Directorio de usuarios</h2><p>{{ usuarios().length }} cuentas registradas</p></div><button type="button" (click)="nuevoUsuario()" [disabled]="restableciendo()">Nuevo usuario</button></div>
-        <label class="busqueda">Buscar usuario<input type="search" placeholder="Nombre, usuario o correo" [value]="busqueda()" (input)="busqueda.set($any($event.target).value)" /></label>
+        <div class="encabezado-listado">
+          <div>
+            <h2>Directorio de usuarios</h2>
+            <p>{{ usuarios().length }} cuentas registradas</p>
+          </div>
+          <button
+            type="button"
+            (click)="nuevoUsuario()"
+            [disabled]="restableciendo() || guardando()"
+          >
+            Nuevo usuario
+          </button>
+        </div>
+        <label class="busqueda"
+          >Buscar usuario<input
+            type="search"
+            placeholder="Nombre, usuario o correo"
+            [value]="busqueda()"
+            (input)="busqueda.set($any($event.target).value)"
+        /></label>
         <div class="contenedor-tabla">
           <table>
             <thead>
               <tr>
                 <th>Usuario</th>
                 <th>Nombre</th>
-                <th>Estado</th><th>Acciones</th>
+                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               @for (u of usuariosFiltrados(); track u.id) {
                 <tr (click)="seleccionar(u)" [class.fila-activa]="seleccionado()?.id === u.id">
-                  <td><strong>{{ u.nombreUsuario }}</strong><span class="correo-usuario">{{ u.correo }}</span></td>
+                  <td>
+                    <strong>{{ u.nombreUsuario }}</strong
+                    ><span class="correo-usuario">{{ u.correo }}</span>
+                  </td>
                   <td>{{ u.nombres }} {{ u.apellidos }}</td>
-                  <td><span class="estado-usuario" [class.inactivo]="!u.activo">{{ u.activo ? 'Activo' : 'Inactivo' }}</span></td><td><button type="button" class="secundario" [attr.aria-label]="'Editar usuario ' + u.nombreUsuario" [disabled]="restableciendo()" (click)="$event.stopPropagation(); seleccionar(u)">{{ seleccionado()?.id === u.id ? 'Seleccionado' : 'Editar' }}</button></td>
+                  <td>
+                    <span class="estado-usuario" [class.inactivo]="!u.activo">{{
+                      u.activo ? 'Activo' : 'Inactivo'
+                    }}</span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="secundario"
+                      [attr.aria-label]="'Editar usuario ' + u.nombreUsuario"
+                      [disabled]="restableciendo() || guardando()"
+                      (click)="$event.stopPropagation(); seleccionar(u)"
+                    >
+                      {{ seleccionado()?.id === u.id ? 'Seleccionado' : 'Editar' }}
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="sin-resultados">
+                    No hay usuarios que coincidan con la búsqueda.
+                  </td>
                 </tr>
               }
-              @empty { <tr><td colspan="4" class="sin-resultados">No hay usuarios que coincidan con la búsqueda.</td></tr> }
             </tbody>
           </table>
         </div>
       </section>
       <div>
         @if (!seleccionado()) {
-        <form class="tarjeta formulario" [formGroup]="formularioCreacion" (ngSubmit)="crear()">
-          <div class="titulo-formulario"><span class="antetitulo">NUEVA CUENTA</span><h2>Crear usuario</h2><p>Completa los datos y asigna un rol inicial.</p></div>
-          <label>Nombres<input formControlName="nombres" /></label
-          ><label>Apellidos<input formControlName="apellidos" /></label
-          ><label>Usuario<input formControlName="nombreUsuario" /></label
-          ><label>Correo<input formControlName="correo" type="email" /></label
-          ><label
-            >Contraseña inicial<input
-              formControlName="contrasena"
-              type="password"
-              minlength="12" /></label
-          ><label
-            >Rol inicial<select formControlName="rol">
-              @for (rol of roles(); track rol) {
-                <option [value]="rol">{{ rol | etiquetaEspanol }}</option>
-              }
-            </select></label
-          ><button [disabled]="formularioCreacion.invalid">Crear usuario</button>
-        </form>
+          <form class="tarjeta formulario" [formGroup]="formularioCreacion" (ngSubmit)="crear()">
+            <div class="titulo-formulario">
+              <span class="antetitulo">NUEVA CUENTA</span>
+              <h2>Crear usuario</h2>
+              <p>Completa los datos y asigna un rol inicial.</p>
+            </div>
+            <label>Nombres<input formControlName="nombres" /></label
+            ><label>Apellidos<input formControlName="apellidos" /></label
+            ><label>Usuario<input formControlName="nombreUsuario" /></label
+            ><label>Correo<input formControlName="correo" type="email" /></label
+            ><label
+              >Contraseña inicial<input
+                formControlName="contrasena"
+                type="password"
+                minlength="12" /></label
+            ><label
+              >Rol inicial<select formControlName="rol">
+                @for (rol of roles(); track rol) {
+                  <option [value]="rol">{{ rol | etiquetaEspanol }}</option>
+                }
+              </select></label
+            ><button [disabled]="formularioCreacion.invalid || guardando() || restableciendo()">
+              Crear usuario
+            </button>
+          </form>
         }
         @if (seleccionado(); as u) {
           <form
@@ -75,15 +123,20 @@ import { Usuario } from '../nucleo/autenticacion.servicio';
             [formGroup]="formularioEdicion"
             (ngSubmit)="guardar(u.id)"
           >
-            <div class="titulo-formulario"><span class="antetitulo">DATOS Y PERMISOS</span><h2>{{ u.nombreUsuario }}</h2><p>Actualiza sus datos y los roles asignados.</p></div>
+            <div class="titulo-formulario">
+              <span class="antetitulo">DATOS Y PERMISOS</span>
+              <h2>{{ u.nombreUsuario }}</h2>
+              <p>Actualiza sus datos y los roles asignados.</p>
+            </div>
             <label>Nombres<input formControlName="nombres" /></label
             ><label>Apellidos<input formControlName="apellidos" /></label
             ><label>Correo<input formControlName="correo" type="email" /></label
             ><label class="casilla"
               ><input type="checkbox" formControlName="activo" /> Usuario activo</label
             >
-            <fieldset>
-              <legend>Roles asignados</legend><p class="ayuda-roles">Selecciona uno o varios roles para esta cuenta.</p>
+            <fieldset [disabled]="guardando() || restableciendo()">
+              <legend>Roles asignados</legend>
+              <p class="ayuda-roles">Selecciona uno o varios roles para esta cuenta.</p>
               @for (rol of roles(); track rol) {
                 <label class="casilla"
                   ><input
@@ -94,27 +147,62 @@ import { Usuario } from '../nucleo/autenticacion.servicio';
                 >
               }
             </fieldset>
-            <button [disabled]="formularioEdicion.invalid || rolesSeleccionados().length === 0">
+            <button
+              [disabled]="
+                formularioEdicion.invalid ||
+                rolesSeleccionados().length === 0 ||
+                guardando() ||
+                restableciendo()
+              "
+            >
               Guardar cambios
             </button>
           </form>
 
-          <form class="tarjeta formulario" [formGroup]="formularioContrasena"
-                (ngSubmit)="restablecerContrasena(u)">
-            <div class="titulo-formulario"><span class="antetitulo">SEGURIDAD</span><h2>Restablecer contraseña</h2></div>
-            <p>No necesitas conocer la contraseña actual. La nueva debe tener entre 12 y 72 caracteres.</p>
-            <label>Nueva contraseña
-              <input type="password" formControlName="contrasenaNueva" autocomplete="new-password"
-                     minlength="12" maxlength="72" />
+          <form
+            class="tarjeta formulario"
+            [formGroup]="formularioContrasena"
+            (ngSubmit)="restablecerContrasena(u)"
+          >
+            <div class="titulo-formulario">
+              <span class="antetitulo">SEGURIDAD</span>
+              <h2>Restablecer contraseña</h2>
+            </div>
+            <p>
+              No necesitas conocer la contraseña actual. La nueva debe tener entre 12 y 72
+              caracteres.
+            </p>
+            <label
+              >Nueva contraseña
+              <input
+                type="password"
+                formControlName="contrasenaNueva"
+                autocomplete="new-password"
+                minlength="12"
+                maxlength="72"
+              />
             </label>
-            <label>Confirmar nueva contraseña
-              <input type="password" formControlName="confirmacion" autocomplete="new-password"
-                     minlength="12" maxlength="72" />
+            <label
+              >Confirmar nueva contraseña
+              <input
+                type="password"
+                formControlName="confirmacion"
+                autocomplete="new-password"
+                minlength="12"
+                maxlength="72"
+              />
             </label>
             @if (formularioContrasena.controls.confirmacion.touched && !contrasenasCoinciden()) {
               <p class="alerta" role="alert">Las contraseñas no coinciden.</p>
             }
-            <button [disabled]="formularioContrasena.invalid || !contrasenasCoinciden() || restableciendo()">
+            <button
+              [disabled]="
+                formularioContrasena.invalid ||
+                !contrasenasCoinciden() ||
+                restableciendo() ||
+                guardando()
+              "
+            >
               {{ restableciendo() ? 'Guardando…' : 'Restablecer contraseña' }}
             </button>
           </form>
@@ -129,10 +217,15 @@ export class PaginaUsuarios implements OnInit {
   busqueda = signal('');
   usuariosFiltrados() {
     const termino = this.busqueda().trim().toLocaleLowerCase('es');
-    return this.usuarios().filter(u => [u.nombreUsuario, u.nombres, u.apellidos, u.correo].join(' ').toLocaleLowerCase('es').includes(termino));
+    return this.usuarios().filter((u) =>
+      [u.nombreUsuario, u.nombres, u.apellidos, u.correo]
+        .join(' ')
+        .toLocaleLowerCase('es')
+        .includes(termino),
+    );
   }
   nuevoUsuario() {
-    if (this.restableciendo()) return;
+    if (this.restableciendo() || this.guardando()) return;
     this.seleccionado.set(null);
     this.formularioContrasena.reset();
     this.error.set('');
@@ -157,9 +250,13 @@ export class PaginaUsuarios implements OnInit {
     correo: ['', [Validators.required, Validators.email]],
     activo: [true],
   });
+  guardando = signal(false);
   restableciendo = signal(false);
   formularioContrasena = this.constructorFormularios.nonNullable.group({
-    contrasenaNueva: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(72)]],
+    contrasenaNueva: [
+      '',
+      [Validators.required, Validators.minLength(12), Validators.maxLength(72)],
+    ],
     confirmacion: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(72)]],
   });
   contrasenasCoinciden() {
@@ -167,43 +264,47 @@ export class PaginaUsuarios implements OnInit {
     return valores.contrasenaNueva === valores.confirmacion;
   }
   restablecerContrasena(usuario: Usuario) {
-    if (this.restableciendo() || this.formularioContrasena.invalid || !this.contrasenasCoinciden()) return;
+    if (
+      this.guardando() ||
+      this.restableciendo() ||
+      this.formularioContrasena.invalid ||
+      !this.contrasenasCoinciden()
+    )
+      return;
     this.restableciendo.set(true);
     this.error.set('');
     this.mensaje.set('');
-    this.api.modificar<void>(`/usuarios/${usuario.id}/contrasena`, {
-      contrasenaNueva: this.formularioContrasena.getRawValue().contrasenaNueva,
-    }).subscribe({
-      next: () => {
-        this.formularioContrasena.reset();
-        this.restableciendo.set(false);
-        this.mensaje.set(`Contraseña de ${usuario.nombreUsuario} restablecida correctamente.`);
-      },
-      error: (e) => {
-        this.restableciendo.set(false);
-        this.error.set(e.error?.mensaje || 'No se pudo restablecer la contraseña.');
-      },
-    });
+    this.api
+      .modificar<void>(`/usuarios/${usuario.id}/contrasena`, {
+        contrasenaNueva: this.formularioContrasena.getRawValue().contrasenaNueva,
+      })
+      .subscribe({
+        next: () => {
+          this.formularioContrasena.reset();
+          this.restableciendo.set(false);
+          this.mensaje.set(`Contraseña de ${usuario.nombreUsuario} restablecida correctamente.`);
+        },
+        error: (e) => {
+          this.restableciendo.set(false);
+          this.error.set(e.error?.mensaje || 'No se pudo restablecer la contraseña.');
+        },
+      });
   }
   ngOnInit() {
     this.cargar();
-    this.api
-      .obtener<string[]>('/roles')
-      .subscribe({
-        next: (r) => this.roles.set(r),
-        error: () => this.error.set('No se pudieron cargar roles.'),
-      });
+    this.api.obtener<string[]>('/roles').subscribe({
+      next: (r) => this.roles.set(r),
+      error: () => this.error.set('No se pudieron cargar roles.'),
+    });
   }
   cargar() {
-    this.api
-      .obtener<Usuario[]>('/usuarios')
-      .subscribe({
-        next: (r) => this.usuarios.set(r),
-        error: () => this.error.set('No se pudieron cargar usuarios.'),
-      });
+    this.api.obtener<Usuario[]>('/usuarios').subscribe({
+      next: (r) => this.usuarios.set(r),
+      error: () => this.error.set('No se pudieron cargar usuarios.'),
+    });
   }
   seleccionar(u: Usuario) {
-    if (this.restableciendo()) return;
+    if (this.restableciendo() || this.guardando()) return;
     this.seleccionado.set(u);
     this.formularioContrasena.reset();
     this.rolesSeleccionados.set([...u.roles]);
@@ -217,12 +318,15 @@ export class PaginaUsuarios implements OnInit {
     this.mensaje.set('');
   }
   alternarRol(rol: string) {
+    if (this.guardando() || this.restableciendo()) return;
     this.rolesSeleccionados.update((actual) =>
       actual.includes(rol) ? actual.filter((r) => r !== rol) : [...actual, rol],
     );
   }
   crear() {
-    if (this.formularioCreacion.invalid) return;
+    if (this.formularioCreacion.invalid || this.guardando() || this.restableciendo()) return;
+    this.guardando.set(true);
+    this.formularioCreacion.disable();
     const v = this.formularioCreacion.getRawValue();
     this.api
       .crear<Usuario>('/usuarios', {
@@ -235,6 +339,8 @@ export class PaginaUsuarios implements OnInit {
       })
       .subscribe({
         next: () => {
+          this.guardando.set(false);
+          this.formularioCreacion.enable();
           this.formularioCreacion.reset({
             nombres: '',
             apellidos: '',
@@ -247,11 +353,23 @@ export class PaginaUsuarios implements OnInit {
           this.error.set('');
           this.cargar();
         },
-        error: (e) => this.error.set(e.error?.mensaje || 'No se pudo crear el usuario.'),
+        error: (e) => {
+          this.guardando.set(false);
+          this.formularioCreacion.enable();
+          this.error.set(e.error?.mensaje || 'No se pudo crear el usuario.');
+        },
       });
   }
   guardar(id: number) {
-    if (this.formularioEdicion.invalid || !this.rolesSeleccionados().length) return;
+    if (
+      this.formularioEdicion.invalid ||
+      !this.rolesSeleccionados().length ||
+      this.guardando() ||
+      this.restableciendo()
+    )
+      return;
+    this.guardando.set(true);
+    this.formularioEdicion.disable();
     this.api
       .reemplazar<Usuario>(`/usuarios/${id}`, {
         ...this.formularioEdicion.getRawValue(),
@@ -259,12 +377,18 @@ export class PaginaUsuarios implements OnInit {
       })
       .subscribe({
         next: (u) => {
-          this.seleccionado.set(u);
+          this.guardando.set(false);
+          this.formularioEdicion.enable();
+          this.seleccionar(u);
           this.mensaje.set('Usuario actualizado.');
           this.error.set('');
           this.cargar();
         },
-        error: (e) => this.error.set(e.error?.mensaje || 'No se pudo actualizar el usuario.'),
+        error: (e) => {
+          this.guardando.set(false);
+          this.formularioEdicion.enable();
+          this.error.set(e.error?.mensaje || 'No se pudo actualizar el usuario.');
+        },
       });
   }
 }

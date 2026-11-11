@@ -1,0 +1,13 @@
+flowchart TD
+ A([Inicio: necesidad de investigación]) --> B[Gestor de problemas o administrador registra problema]
+ B --> C[Vincular incidencias relacionadas]
+ C --> D[Pasar a En investigación y registrar análisis]
+ D --> E{¿Hay conocimiento reutilizable?}
+ E -->|Sí| F[Registrar error conocido vinculado al problema]
+ E -->|No| G[Continuar investigación]
+ G --> D
+ F --> H[Documentar solución temporal y síntomas]
+ H --> I[Registrar solución definitiva cuando exista]
+ I --> J[Actualizar problema a Resuelto]
+ J --> K[Revisar y actualizar a Cerrado]
+ K --> L([Fin])

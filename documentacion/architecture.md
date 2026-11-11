@@ -33,6 +33,8 @@ En desarrollo, Angular utiliza el puerto 4200 y Spring Boot el 8080; el puerto d
 
 Los controladores reciben las solicitudes, los servicios contienen reglas de negocio relevantes y los repositorios o consultas JDBC acceden a los datos. La separación no es uniforme en todos los módulos: varios controladores compactos concentran también lógica o persistencia. No se afirma una implementación estricta de arquitectura limpia o hexagonal.
 
+La versión corregida incorpora ServicioErroresConocidos, políticas compartidas de estados y contraseñas, protección transaccional del último administrador y control optimista de concurrencia. Véase [Cierre de calidad](cierre-revision-calidad.md).
+
 ## 3. Organización modular
 
 Raíz Java: `pe.gob.mtc.sgip`.
@@ -73,6 +75,7 @@ Los identificadores internos son independientes de los nombres de usuario. Las c
 | V2__problem_comments.sql | Comentarios de problemas. |
 | V3__nombres_en_espanol.sql | Traducción de tablas, columnas y valores propios conservando datos. |
 | V4__normalizar_nombres_usuario.sql | Elimina espacios exteriores en nombres de usuario; rechaza colisiones antes de actualizar. |
+| V5__control_de_concurrencia.sql | Columnas de versión para detectar escrituras simultáneas. |
 
 Las migraciones aplicadas no deben modificarse: Flyway verifica sus sumas de comprobación. Los cambios posteriores se realizan con nuevas migraciones.
 
@@ -104,13 +107,13 @@ Cada instalación debe configurar su propia conexión PostgreSQL y autenticació
 
 La prioridad se calcula sumando impacto y urgencia: Bajo=1, Medio=2, Alto=3 y Crítico=4. Suma 7–8: P1; 5–6: P2; 3–4: P3; 2: P4. Esta matriz es inicial y debe validarse con el MTC.
 
-El cambio de estado admite las reglas documentadas: Nuevo a Cancelado; Asignado a En atención, Pendiente o Cancelado; En atención a Pendiente o Resuelto; Pendiente a En atención o Resuelto; Resuelto a Cerrado o En atención. La asignación establece Asignado. Resolver exige una solución. No todas las transiciones del servidor se ofrecen como opción directa en la interfaz.
+El cambio de estado admite las reglas documentadas: Nuevo a Cancelado; Asignado a En atención, Pendiente o Cancelado; En atención a Pendiente o Resuelto; Pendiente a En atención o Resuelto; Resuelto a Cerrado o En atención. La asignación inicial establece Asignado; las reasignaciones conservan el estado de los casos abiertos y se rechazan en Resuelto, Cerrado y Cancelado. Resolver exige una solución. No todas las transiciones del servidor se ofrecen como opción directa en la interfaz.
 
-Los comentarios internos de incidencias se ocultan a los solicitantes. El historial registra cambios importantes. Queda pendiente revisar integralmente la interacción entre asignación y estados terminales.
+Los comentarios internos de incidencias se ocultan a los solicitantes. El historial registra cambios importantes. La reapertura de Resuelto a En atención limpia la fecha y la solución vigentes, conservando el registro de la solución anterior en el historial.
 
 ### Problemas y conocimiento
 
-Los problemas conservan causa raíz, soluciones y vínculos con incidencias. Los errores conocidos contienen síntomas, causa conocida, soluciones y referencia a un problema. La selección de estados de problemas no constituye todavía un flujo institucional exhaustivamente validado.
+Los problemas conservan causa raíz, soluciones y vínculos con incidencias. Los errores conocidos contienen síntomas, causa conocida, soluciones y referencia a un problema. ServicioProblemas concentra las operaciones transaccionales y PoliticaEstadosProblema valida sus transiciones. Abierto pasa a En investigación; desde allí puede pasar a Error conocido o Resuelto. Error conocido permite volver a investigar o resolver. Resuelto permite reabrir la investigación o cerrar. Resolver y cerrar exigen una solución definitiva documentada. Estas reglas iniciales deben validarse con el procedimiento institucional. Véase [Correcciones de flujos](correcciones-flujos.md).
 
 ## 7. Consultas, filtros y límites
 

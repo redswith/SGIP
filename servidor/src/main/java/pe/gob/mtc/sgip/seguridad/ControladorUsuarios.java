@@ -18,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RestController @RequestMapping("/api/usuarios")
 public class ControladorUsuarios {
     private final RepositorioUsuarios repositorio; private final PasswordEncoder codificador;private final ServicioActividad actividad;
-    public ControladorUsuarios(RepositorioUsuarios repositorio,PasswordEncoder codificador,ServicioActividad actividad) { this.repositorio=repositorio; this.codificador=codificador;this.actividad=actividad; }
+    private final PoliticaAdministradores administradores;
+    public ControladorUsuarios(RepositorioUsuarios repositorio,PasswordEncoder codificador,ServicioActividad actividad, PoliticaAdministradores administradores) { this.repositorio=repositorio; this.codificador=codificador;this.actividad=actividad;this.administradores=administradores; }
     public record Vista(Long id,String nombres,String apellidos,String nombreUsuario,String correo,boolean activo,Set<String> roles) {
         public Vista(Usuario u) { this(u.id,u.nombres,u.apellidos,u.nombreUsuario,u.correo,u.activo,Set.copyOf(u.roles)); }
     }
@@ -31,15 +32,19 @@ public class ControladorUsuarios {
     @GetMapping("/tecnicos") @PreAuthorize("hasAnyRole('ADMINISTRADOR','MESA_SERVICIO','GESTOR_INCIDENTES','GESTOR_PROBLEMAS')") public java.util.List<Vista> tecnicos() { return repositorio.buscarActivos().stream().filter(u -> u.roles.contains("TECNICO")||u.roles.contains("ADMINISTRADOR")).map(Vista::new).toList(); }
     @GetMapping @PreAuthorize("hasRole('ADMINISTRADOR')") public java.util.List<Vista> listar() { return repositorio.findAll().stream().map(Vista::new).toList(); }
     @PostMapping @ResponseStatus(HttpStatus.CREATED) @PreAuthorize("hasRole('ADMINISTRADOR')") @Transactional public Vista crear(@Valid @RequestBody Creacion r) {
+        PoliticaContrasenas.validar(r.contrasena());
         String nombreUsuario = r.nombreUsuario().strip();
         if (repositorio.existePorNombreUsuario(nombreUsuario) || repositorio.existePorCorreo(r.correo())) throw new ResponseStatusException(HttpStatus.CONFLICT,"Usuario o correo duplicado");
         var u=new Usuario(); u.nombres=r.nombres();u.apellidos=r.apellidos();u.nombreUsuario=nombreUsuario;u.correo=r.correo();u.resumenContrasena=codificador.encode(r.contrasena());u.roles=roles(r.roles());
         repositorio.save(u);actividad.auditarActual("REGISTRO","USUARIO",u.id,u.nombreUsuario);return new Vista(u);
     }
     @PutMapping("/{id}") @PreAuthorize("hasRole('ADMINISTRADOR')") @Transactional public Vista actualizar(@PathVariable Long id,@Valid @RequestBody Actualizacion r) {
+        administradores.bloquearCambios();
         var u=repositorio.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        var nuevosRoles = roles(r.roles());
+        administradores.validarActualizacion(u, r.activo(), nuevosRoles);
         verificarCorreoDisponible(r.correo(),u.id);
-        u.nombres=r.nombres();u.apellidos=r.apellidos();u.correo=r.correo();u.activo=r.activo();u.roles=roles(r.roles());u.actualizadoEn=Instant.now();repositorio.save(u);actividad.auditarActual("ACTUALIZACION","USUARIO",u.id,u.nombreUsuario);return new Vista(u);
+        u.nombres=r.nombres();u.apellidos=r.apellidos();u.correo=r.correo();u.activo=r.activo();u.roles=nuevosRoles;u.actualizadoEn=Instant.now();repositorio.save(u);actividad.auditarActual("ACTUALIZACION","USUARIO",u.id,u.nombreUsuario);return new Vista(u);
     }
     @PatchMapping("/mi-perfil") @Transactional public Vista perfil(@Valid @RequestBody Perfil r,Authentication autenticacion) {
         var u=repositorio.buscarPorNombreUsuario(autenticacion.getName()).orElseThrow();verificarCorreoDisponible(r.correo(),u.id);
@@ -48,6 +53,7 @@ public class ControladorUsuarios {
     @PatchMapping("/mi-perfil/contrasena") @Transactional public void contrasena(@Valid @RequestBody CambioContrasena r,Authentication autenticacion) {
         var u=repositorio.buscarPorNombreUsuario(autenticacion.getName()).orElseThrow();
         if(!codificador.matches(r.contrasenaActual(),u.resumenContrasena))throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Contraseña actual incorrecta");
+        PoliticaContrasenas.validar(r.contrasenaNueva());
         u.resumenContrasena=codificador.encode(r.contrasenaNueva());u.actualizadoEn=Instant.now();repositorio.save(u);actividad.auditarActual("CAMBIAR_CONTRASENA","USUARIO",u.id,u.nombreUsuario);
     }
 
@@ -60,10 +66,7 @@ public class ControladorUsuarios {
     @Transactional
     public void restablecerContrasena(@PathVariable Long id,
             @Valid @RequestBody RestablecimientoContrasena solicitud) {
-        if (solicitud.contrasenaNueva().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "La contraseña supera el límite de 72 bytes; utiliza menos caracteres.");
-        }
+        PoliticaContrasenas.validar(solicitud.contrasenaNueva());
         var usuario = repositorio.findById(id).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario inexistente"));
         usuario.resumenContrasena = codificador.encode(solicitud.contrasenaNueva());

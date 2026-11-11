@@ -12,3 +12,4 @@ cliente/coverage/
 *.backup
 .env.*
 !.env.ejemplo
+/.vscode/

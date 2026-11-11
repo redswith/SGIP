@@ -8,6 +8,7 @@ import java.util.Set;
 @Entity @Table(name="usuarios")
 public class Usuario {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY) public Long id;
+    @Version public Long version;
     @Column(name="nombres",nullable=false) public String nombres;
     @Column(name="apellidos",nullable=false) public String apellidos;
     @Column(name="nombre_usuario",nullable=false,unique=true) public String nombreUsuario;

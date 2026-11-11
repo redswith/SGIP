@@ -1,6 +1,6 @@
 # SGIP — Sistema de Gestión de Incidencias y Problemas
 
-Actualizado: **7 de noviembre de 2026**.
+Actualizado: **9 de noviembre de 2026**.
 
 Aplicación web del proyecto MTC para registrar y atender incidencias, investigar problemas, conservar errores conocidos y relacionar equipos, aplicaciones y servicios. Es una implementación local en desarrollo; las reglas institucionales requieren validación.
 
@@ -77,7 +77,7 @@ mvn test
 
 Las pruebas de integración requieren una **base separada**, por ejemplo `sgip_it`, configuración de conexión y `SGIP_PRUEBAS_INTEGRACION=true`. Generan registros de prueba; no deben apuntar a la base operativa. Sin esa variable se omite la integración.
 
-La última compilación de interfaz registrada terminó correctamente con advertencia de tamaño inicial: aproximadamente **525,78 kB** frente al presupuesto de **500 kB**. No equivale a una validación completa de todos los flujos. Esta actualización documental no vuelve a ejecutar las pruebas.
+Verificación del 9 de noviembre: **19 pruebas del servidor y 22 de Angular aprobadas**. Maven genera el servidor y Angular compila sin advertencia de presupuesto inicial (300,46 kB). Consulta el [cierre de la revisión de calidad](documentacion/cierre-revision-calidad.md) para ver las correcciones, la migración V5 y el alcance de las pruebas.
 
 ## Alcance de los filtros
 

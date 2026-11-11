@@ -25,6 +25,11 @@ import org.springframework.security.core.AuthenticationException;
     @ExceptionHandler(DataIntegrityViolationException.class) public ResponseEntity<Map<String,Object>> conflicto(DataIntegrityViolationException e,HttpServletRequest r){return resultado(HttpStatus.CONFLICT,"El registro entra en conflicto con datos existentes",r);}
     @ExceptionHandler(AccessDeniedException.class) public ResponseEntity<Map<String,Object>> denegado(AccessDeniedException e,HttpServletRequest r){return resultado(HttpStatus.FORBIDDEN,"Acceso denegado",r);}
     @ExceptionHandler(AuthenticationException.class) public ResponseEntity<Map<String,Object>> noAutenticado(AuthenticationException e,HttpServletRequest r){return resultado(HttpStatus.UNAUTHORIZED,"No autenticado",r);}
+    @ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String,Object>> concurrencia(Exception error, HttpServletRequest solicitud) {
+        return resultado(HttpStatus.CONFLICT,
+            "El registro cambió mientras se guardaba. Actualiza los datos y vuelve a intentarlo.", solicitud);
+    }
     @ExceptionHandler(Exception.class) public ResponseEntity<Map<String,Object>> inesperado(Exception e,HttpServletRequest r){log.error("Error inesperado en {}",r.getRequestURI(),e);return resultado(HttpStatus.INTERNAL_SERVER_ERROR,"Error interno del servidor",r);}
     private ResponseEntity<Map<String,Object>> resultado(HttpStatus s,String mensaje,HttpServletRequest r){return ResponseEntity.status(s).body(Map.of("fecha",Instant.now().toString(),"estado",s.value(),"error",mensaje,"mensaje",mensaje,"ruta",r.getRequestURI()));}
 }

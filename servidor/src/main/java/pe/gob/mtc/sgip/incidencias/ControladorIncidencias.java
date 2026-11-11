@@ -15,7 +15,6 @@ import jakarta.validation.constraints.NotNull;
 @RestController @RequestMapping("/api/incidencias") public class ControladorIncidencias {
     private final ServicioIncidencias servicio;
     public ControladorIncidencias(ServicioIncidencias servicio) { this.servicio=servicio; }
-    public record Creacion(@NotBlank String titulo,@NotBlank String descripcion,Long categoriaId,@NotBlank String impacto,@NotBlank String urgencia) {}
     public record Asignacion(@NotNull Long asignadoId) {}
     public record Clasificacion(Long categoriaId,@NotBlank String impacto,@NotBlank String urgencia) {}
     public record Transicion(@NotBlank String estado,String solucion) {}
@@ -24,12 +23,16 @@ import jakarta.validation.constraints.NotNull;
     public record Evento(Long id,Long actorId,String accion,String valorAnterior,String valorNuevo,String descripcion,Instant creadoEn){Evento(HistorialIncidencia h){this(h.id,h.actorId,h.accion,h.valorAnterior,h.valorNuevo,h.descripcion,h.creadoEn);}}
     public record Comentario(Long id,Long autorId,String contenido,String visibilidad,Instant creadoEn){Comentario(ComentarioIncidencia c){this(c.id,c.autorId,c.contenido,c.visibilidad,c.creadoEn);}}
     public record RespuestaPaginada<T>(List<T> contenido,long totalElementos,int totalPaginas,int numero,boolean ultima) { RespuestaPaginada(Page<T> p){this(p.getContent(),p.getTotalElements(),p.getTotalPages(),p.getNumber(),p.isLast());} }
-    @PostMapping @ResponseStatus(HttpStatus.CREATED) public Vista crear(@Valid @RequestBody Creacion solicitud,Authentication autenticacion){return new Vista(servicio.crear(solicitud,autenticacion));}
-    @GetMapping public RespuestaPaginada<Vista> listar(@RequestParam(required=false) String estado,Pageable pagina,Authentication autenticacion){return new RespuestaPaginada<>(servicio.listar(estado,pagina,autenticacion).map(Vista::new));}
+    @PostMapping @ResponseStatus(HttpStatus.CREATED) public Vista crear(@Valid @RequestBody CreacionIncidencia solicitud,Authentication autenticacion){return new Vista(servicio.crear(solicitud,autenticacion));}
+    @GetMapping public RespuestaPaginada<Vista> listar(@RequestParam(required=false) String estado,@RequestParam(required=false) String q,Pageable pagina,Authentication autenticacion){return new RespuestaPaginada<>(servicio.listar(estado,q,pagina,autenticacion).map(Vista::new));}
     @GetMapping("/{id}") public Vista obtener(@PathVariable Long id,Authentication autenticacion){return new Vista(servicio.obtener(id,autenticacion));}
     @PatchMapping("/{id}/asignacion") @PreAuthorize("hasAnyRole('ADMINISTRADOR','MESA_SERVICIO','GESTOR_INCIDENTES')") public Vista asignar(@PathVariable Long id,@Valid @RequestBody Asignacion solicitud,Authentication autenticacion){return new Vista(servicio.asignar(id,solicitud.asignadoId(),autenticacion));}
     @PatchMapping("/{id}/clasificacion") @PreAuthorize("hasAnyRole('ADMINISTRADOR','MESA_SERVICIO','GESTOR_INCIDENTES')") public Vista clasificar(@PathVariable Long id,@Valid @RequestBody Clasificacion solicitud,Authentication autenticacion){return new Vista(servicio.clasificar(id,solicitud.categoriaId(),solicitud.impacto(),solicitud.urgencia(),autenticacion));}
     @PatchMapping("/{id}/estado") @PreAuthorize("hasAnyRole('ADMINISTRADOR','MESA_SERVICIO','GESTOR_INCIDENTES','TECNICO')") public Vista cambiarEstado(@PathVariable Long id,@Valid @RequestBody Transicion solicitud,Authentication autenticacion){return new Vista(servicio.cambiarEstado(id,solicitud.estado(),solicitud.solucion(),autenticacion));}
+    @GetMapping("/{id}/estados")
+    public List<String> estados(@PathVariable Long id, Authentication autenticacion) {
+        return servicio.estadosDisponibles(id, autenticacion);
+    }
     @GetMapping("/{id}/historial") public List<Evento> historial(@PathVariable Long id,Authentication autenticacion){return servicio.historial(id,autenticacion).stream().map(Evento::new).toList();}
     @GetMapping("/{id}/comentarios") public List<Comentario> comentarios(@PathVariable Long id,Authentication autenticacion){return servicio.comentarios(id,autenticacion).stream().map(Comentario::new).toList();}
     @PostMapping("/{id}/comentarios") @ResponseStatus(HttpStatus.CREATED) public Comentario comentar(@PathVariable Long id,@Valid @RequestBody EntradaComentario solicitud,Authentication autenticacion){return new Comentario(servicio.comentar(id,solicitud.contenido(),solicitud.visibilidad(),autenticacion));}

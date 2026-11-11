@@ -1,0 +1,26 @@
+flowchart TD
+subgraph Solicitante
+ A([Inicio: servicio afectado]) --> B[Registrar incidencia]
+end
+subgraph Sistema
+ B --> C[Validar datos y registrar caso Nuevo]
+ C --> D[Calcular prioridad con impacto y urgencia]
+end
+subgraph Mesa[Administrador / Mesa de servicio / Gestor de incidentes]
+ D --> E[Revisar clasificación y asignar técnico]
+ E --> F[Estado Asignado]
+end
+subgraph Soporte[Técnico autorizado / Personal de gestión]
+ F --> G[Pasar a En atención]
+ G --> H[Diagnosticar y documentar avances]
+ H --> I{¿Requiere espera?}
+ I -->|Sí| J[Pasar a Pendiente]
+ J --> K{¿Puede continuar?}
+ K -->|No| J
+ K -->|Sí| G
+ I -->|No| L[Registrar solución y pasar a Resuelto]
+ L --> M{¿Requiere más atención?}
+ M -->|Sí| G
+ M -->|No| N[Pasar a Cerrado]
+ N --> O([Fin])
+end

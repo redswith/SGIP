@@ -17,11 +17,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-@SpringBootTest @AutoConfigureMockMvc
+@SpringBootTest @AutoConfigureMockMvc(print=org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint.NONE)
 @EnabledIfEnvironmentVariable(named="SGIP_PRUEBAS_INTEGRACION",matches="true")
 class IntegracionSgipTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
+    @org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+    pe.gob.mtc.sgip.auditoria.ServicioActividad actividad;
+
 
     @Test void permiteConexionDesdeLaInterfaz() throws Exception {
         mvc.perform(options("/api/autenticacion/ingresar")
@@ -48,9 +51,20 @@ class IntegracionSgipTest {
         enviar(patch("/api/incidencias/{id}/asignacion",incidenciaId),admin,Map.of("asignadoId",tecnico.get("id").asLong()),200);
         enviar(patch("/api/incidencias/{id}/estado",incidenciaId),admin,Map.of("estado","EN_ATENCION"),200);
         enviar(patch("/api/incidencias/{id}/estado",incidenciaId),admin,Map.of("estado","RESUELTO","solucion","Servicio restaurado"),200);
+        enviar(patch("/api/incidencias/{id}/asignacion",incidenciaId),admin,Map.of("asignadoId",tecnico.get("id").asLong()),409);
+        enviar(patch("/api/incidencias/{id}/estado",incidenciaId),admin,Map.of("estado","EN_ATENCION"),200);
+        var reabierto=leer(get("/api/incidencias/{id}",incidenciaId),admin,200);
+        assertThat(reabierto.get("solucion").isNull()).isTrue();
+        var fechaResuelta=jdbc.queryForObject("SELECT resuelto_en FROM incidencias WHERE id=?",java.sql.Timestamp.class,incidenciaId);
+        assertThat(fechaResuelta).isNull();
+        var reasignado=enviar(patch("/api/incidencias/{id}/asignacion",incidenciaId),admin,Map.of("asignadoId",tecnico.get("id").asLong()),200);
+        assertThat(reasignado.get("estado").asText()).isEqualTo("EN_ATENCION");
+        enviar(patch("/api/incidencias/{id}/estado",incidenciaId),admin,Map.of("estado","RESUELTO","solucion","Servicio restaurado otra vez"),200);
         JsonNode cerrado=enviar(patch("/api/incidencias/{id}/estado",incidenciaId),admin,Map.of("estado","CERRADO"),200);
         assertThat(cerrado.get("estado").asText()).isEqualTo("CERRADO");
         assertThat(cerrado.get("prioridad").asText()).isEqualTo("P1");
+        enviar(patch("/api/incidencias/{id}/asignacion",incidenciaId),admin,Map.of("asignadoId",tecnico.get("id").asLong()),409);
+        assertThat(leer(get("/api/incidencias/{id}",incidenciaId),admin,200).get("estado").asText()).isEqualTo("CERRADO");
         JsonNode problema=enviar(post("/api/problemas"),admin,Map.of("titulo","Problema de integración","descripcion","Análisis recurrente","prioridad","P2"),201);
         long problemaId=problema.get("id").asLong();
         enviar(post("/api/problemas/{id}/incidencias/{incidenciaId}",problemaId,incidenciaId),admin,Map.of(),204);
@@ -67,6 +81,8 @@ class IntegracionSgipTest {
         enviar(post("/api/configuracion/{id}/problemas/{problemaId}",elementoId,problemaId),admin,Map.of(),204);
         assertThat(leer(get("/api/configuracion/{id}/incidencias",elementoId),admin,200).toString()).contains(String.valueOf(incidenciaId));
         assertThat(leer(get("/api/configuracion/{id}/problemas",elementoId),admin,200).toString()).contains(String.valueOf(problemaId));
+        String sesionTecnico=ingresar(tecnico.get("nombreUsuario").asText(),"LocalTech12345!");
+        leer(delete("/api/configuracion/{id}/incidencias/{incidenciaId}",elementoId,incidenciaId),sesionTecnico,403);
         leer(delete("/api/configuracion/{id}/incidencias/{incidenciaId}",elementoId,incidenciaId),admin,204);
         assertThat(leer(get("/api/configuracion/{id}/incidencias",elementoId),admin,200).size()).isZero();
         JsonNode panel=leer(get("/api/reportes/panel").param("estado","CERRADO"),admin,200);
@@ -129,6 +145,51 @@ class IntegracionSgipTest {
         assertThat(ingresar("  "+nombre+"  ",clave)).isNotBlank();
         enviar(post("/api/usuarios"),administrador,Map.of("nombres","Prueba","apellidos","Duplicado",
             "nombreUsuario",nombre+" ","correo","otro"+nombre+"@example.invalid","contrasena",clave,"roles",new String[]{"USUARIO"}),409);
+    }
+
+    @Test void rechazaCiclosDirectosEIndirectosDeCategorias() throws Exception {
+        String admin=ingresar(System.getenv().getOrDefault("ADMIN_USUARIO","admin"),System.getenv("ADMIN_CONTRASENA"));
+        String sufijo=UUID.randomUUID().toString();
+        long a=enviar(post("/api/categorias"),admin,Map.of("nombre","A-"+sufijo,"activo",true),201).get("id").asLong();
+        long b=enviar(post("/api/categorias"),admin,Map.of("nombre","B-"+sufijo,"padreId",a,"activo",true),201).get("id").asLong();
+        long c=enviar(post("/api/categorias"),admin,Map.of("nombre","C-"+sufijo,"padreId",b,"activo",true),201).get("id").asLong();
+        for(long padre:new long[]{a,b,c}) {
+            enviar(put("/api/categorias/{id}",a),admin,Map.of("nombre","A-"+sufijo,"padreId",padre,"activo",true),409);
+        }
+        assertThat(jdbc.queryForObject("SELECT padre_id FROM categorias WHERE id=?",Long.class,a)).isNull();
+        enviar(put("/api/categorias/{id}",c),admin,Map.of("nombre","C-"+sufijo,"padreId",a,"activo",true),200);
+    }
+
+    @Test void controlaResolucionCierreYReaperturaDelProblema() throws Exception {
+        String admin=ingresar(System.getenv().getOrDefault("ADMIN_USUARIO","admin"),System.getenv("ADMIN_CONTRASENA"));
+        long id=enviar(post("/api/problemas"),admin,Map.of("titulo","Control del ciclo","descripcion","Prueba del flujo","prioridad","P2"),201).get("id").asLong();
+        enviar(patch("/api/problemas/{id}",id),admin,Map.of("estado","CERRADO"),409);
+        enviar(patch("/api/problemas/{id}",id),admin,Map.of("estado","EN_INVESTIGACION"),200);
+        enviar(patch("/api/problemas/{id}",id),admin,Map.of("estado","RESUELTO"),400);
+        assertThat(leer(get("/api/problemas/{id}",id),admin,200).get("estado").asText()).isEqualTo("EN_INVESTIGACION");
+        var resuelto=enviar(patch("/api/problemas/{id}",id),admin,Map.of("estado","RESUELTO","solucionDefinitiva","Corregida la causa"),200);
+        assertThat(resuelto.get("resueltoEn").isNull()).isFalse();
+        var reabierto=enviar(patch("/api/problemas/{id}",id),admin,Map.of("estado","EN_INVESTIGACION"),200);
+        assertThat(reabierto.get("resueltoEn").isNull()).isTrue();
+        enviar(patch("/api/problemas/{id}",id),admin,Map.of("estado","RESUELTO"),200);
+        enviar(patch("/api/problemas/{id}",id),admin,Map.of("estado","CERRADO"),200);
+        enviar(patch("/api/problemas/{id}",id),admin,Map.of("estado","ABIERTO"),409);
+        enviar(patch("/api/problemas/{id}",id),admin,Map.of("solucionDefinitiva",""),400);
+    }
+
+    @Test void revierteConfiguracionSiFallaLaAuditoria() throws Exception {
+        String admin=ingresar(System.getenv().getOrDefault("ADMIN_USUARIO","admin"),System.getenv("ADMIN_CONTRASENA"));
+        String codigo="REV-"+UUID.randomUUID().toString().substring(0,8);
+        org.mockito.Mockito.doThrow(new IllegalStateException("Fallo de auditoría simulado"))
+            .when(actividad).auditarActual(org.mockito.ArgumentMatchers.eq("REGISTRO"),
+                org.mockito.ArgumentMatchers.eq("ELEMENTO_CONFIGURACION"),
+                org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.eq(codigo));
+        try {
+            enviar(post("/api/configuracion"),admin,Map.of("codigo",codigo,"nombre","Reversión","tipo","EQUIPO","estado","ACTIVO"),500);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM elementos_configuracion WHERE codigo=?",Long.class,codigo)).isZero();
+        } finally {
+            org.mockito.Mockito.reset(actividad);
+        }
     }
 
     private String ingresar(String nombreUsuario,String contrasena) throws Exception {

@@ -5,6 +5,7 @@ import java.time.Instant;
 
 @Entity @Table(name="incidencias") public class Incidencia {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY) public Long id;
+    @Version public Long version;
     @Column(unique=true) public String codigo;
     @Column(nullable=false) public String titulo;
     @Column(nullable=false,columnDefinition="texto") public String descripcion;
